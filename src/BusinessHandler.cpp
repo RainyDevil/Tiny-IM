@@ -23,12 +23,33 @@ void BusinessHandler::handleIncomingMessage(const std::shared_ptr<Session>& sess
             addFriend(from_userId, to_userId); // messageId 被用作 friendId
             break;
         case Message::MessageType::FRIEND_LIST:{
-            // auto friends = getFriendList(from_userId);
-            // //将好友列表返回给客户端
-            // Message response(from_userId, to_userId, Message::MessageType::FRIEND_LIST, 0, friends);
-            // session->send(response);
+            //auto friends = getFriendList(from_userId);
+            //将好友列表返回给客户端
+            nlohmann::json friendsList = nlohmann::json::array(); // 创建一个 JSON 数组
+            // for test 
+            friendsList.push_back({
+                {"id", 131254},
+                {"name", "Alice"},
+                {"avatar", "./alice_avatar.png"}
+            });
+
+            friendsList.push_back({
+                {"id", 131255},
+                {"name", "Bob"},
+                {"avatar", "./bob_avatar.png"}
+            });
+            friendsList.push_back({
+                {"id", 131256},
+                {"name", "KK"},
+                {"avatar", "./KK.png"}
+            });
+            Message response(from_userId, to_userId, Message::MessageType::FRIEND_LIST, 0, friendsList.dump());
+            session->send(response);
             break;
-        }   
+        }
+        case Message::MessageType::FRIEND_REQUEST_RESPONSE:
+            
+            break;   
         case Message::MessageType::PRIVATE_CHAT:
             sendMessageToUser(from_userId, to_userId, msg.getContent());
             break;
@@ -109,14 +130,9 @@ void BusinessHandler::handleDisconnection(const std::shared_ptr<Session>& sessio
         if (it->second == session) {
             it = userSessions_.erase(it);
         } else {
-            // 否则，只移动迭代器
             ++it;
         }
     }
-    for (const auto& pair : userSessions_) {
-        std::cout << pair.first  << std::endl;
-    }
-
 }
 // 获取好友列表
 std::vector<int> BusinessHandler::getFriendList(int userId) {
