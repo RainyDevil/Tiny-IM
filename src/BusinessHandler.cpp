@@ -22,12 +22,13 @@ void BusinessHandler::handleIncomingMessage(const std::shared_ptr<Session>& sess
         case Message::MessageType::ADD_FRIEND:
             addFriend(from_userId, to_userId); // messageId 被用作 friendId
             break;
-        case Message::MessageType::FRIEND_LIST:
-            //auto friends = getFriendList(from_userId);
-            //将好友列表返回给客户端
+        case Message::MessageType::FRIEND_LIST:{
+            // auto friends = getFriendList(from_userId);
+            // //将好友列表返回给客户端
             // Message response(from_userId, to_userId, Message::MessageType::FRIEND_LIST, 0, friends);
             // session->send(response);
             break;
+        }   
         case Message::MessageType::PRIVATE_CHAT:
             sendMessageToUser(from_userId, to_userId, msg.getContent());
             break;
@@ -38,7 +39,7 @@ void BusinessHandler::handleIncomingMessage(const std::shared_ptr<Session>& sess
             std::cerr << "Unknown message type received" << std::endl;
     }
 }
-// 登录用户
+// login
 void BusinessHandler::loginUser(int userId, const std::shared_ptr<Session>& session) {
     if (userSessions_.find(userId) != userSessions_.end()) {
         std::cerr << "User " << userId << " is already logged in." << std::endl;
@@ -52,7 +53,7 @@ void BusinessHandler::loginUser(int userId, const std::shared_ptr<Session>& sess
     std::cout << "User " << userId << " logged in." << std::endl;
 }
 
-// 注销用户
+// logout
 void BusinessHandler::logoutUser(int userId,const std::shared_ptr<Session>& session) {
     auto it = userSessions_.find(userId);
     if (it != userSessions_.end()) {

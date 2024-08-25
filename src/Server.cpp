@@ -20,6 +20,7 @@ void Server::accept() {
                             auto session = std::make_shared<Session>(std::move(*ws),shared_handler_);
                             sessions_.insert(session);
                             std::cout << "Insert a WebSocket session." << std::endl;
+                            std::cout << "Insertion count = " << sessions_.size() << std::endl;
                             session->start();
                         } else {
                             ws->close(websocket::close_code::protocol_error);

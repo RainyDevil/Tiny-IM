@@ -91,6 +91,8 @@ Message::MessageType Message::stringToMessageType(const std::string& typeStr) {
     if (typeStr == "FRIEND_LIST") return MessageType::FRIEND_LIST;
     if (typeStr == "PRIVATE_CHAT") return MessageType::PRIVATE_CHAT;
     if (typeStr == "GROUP_CHAT") return MessageType::GROUP_CHAT;
+    if (typeStr == "FRIEND_REQUEST") return MessageType::FRIEND_REQUEST;
+    if (typeStr == "FRIEND_REQUEST_RESPONSE") return MessageType::FRIEND_REQUEST_RESPONSE;
     // Add more mappings as needed
     throw std::invalid_argument("Unknown message type");
 }
@@ -106,6 +108,8 @@ std::string Message::messageTypeToString(MessageType type) {
         case MessageType::FRIEND_LIST: return "FRIEND_LIST";
         case MessageType::PRIVATE_CHAT: return "PRIVATE_CHAT";
         case MessageType::GROUP_CHAT: return "GROUP_CHAT";
+        case MessageType::FRIEND_REQUEST: return "FRIEND_REQUEST";
+        case MessageType::FRIEND_REQUEST_RESPONSE: return "FRIEND_REQUEST_RESPONSE";
         // Add more mappings as needed
         default: throw std::invalid_argument("Unknown message type");
     }
