@@ -1,0 +1,56 @@
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+CTestTestfile.cmake
+*.cmake
+
+# Build directories
+build/
+Debug/
+Release/
+RelWithDebInfo/
+MinSizeRel/
+
+# Binary files
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Dependency directories
+Dependencies/
+external/
+
+# IDE-specific files (if using certain IDEs, uncomment as needed)
+# .vscode/
+# .idea/
+# *.suo
+# *.user
+# *.swp
+
+# MacOS Finder
+.DS_Store
+
+# Windows thumbnail cache
+Thumbs.db
+
+# Linux trash
+.Trash-*
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*.swn
+*.orig
+*.rej
+*.diff

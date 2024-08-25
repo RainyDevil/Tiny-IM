@@ -3,6 +3,7 @@
 #include "Utils.h"
 #include <unordered_map>
 #include <memory>
+#include <string>
 #include <iostream>
 
 class Session; // Forward declaration

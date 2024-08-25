@@ -13,6 +13,9 @@ void BusinessHandler::handleIncomingMessage(const std::shared_ptr<Session>& sess
             logoutUser(from_userId, session);
             break;
         case Message::MessageType::TEXT:
+            json j;
+            j["usrName"] = std::to_string(from_userId);
+            j["text"] = msg.getContent();
             sendMessageToUser(from_userId, to_userId, msg.getContent());
             break;
         case Message::MessageType::ADD_FRIEND:
@@ -21,8 +24,8 @@ void BusinessHandler::handleIncomingMessage(const std::shared_ptr<Session>& sess
         case Message::MessageType::FRIEND_LIST: {
             auto friends = getFriendList(from_userId);
             //将好友列表返回给客户端
-            Message response(from_userId, to_userId, Message::MessageType::FRIEND_LIST, 0, friends);
-            session->send(response);
+            //Message response(from_userId, to_userId, Message::MessageType::FRIEND_LIST, 0, friends);
+            //session->send(response);
             break;
         }
         case Message::MessageType::PRIVATE_CHAT:
