@@ -15,10 +15,10 @@ public:
         ADD_FRIEND,              //  user1  ---ADD_FRIEND-------------->  服务器
         FRIEND_REQUEST,          //  服务器  ---FRIEND_REQUEST---------->  user2
         FRIEND_REQUEST_RESPONSE, //  user2  ---FRIEND_REQUEST_RESPONSE--> 服务器
-        FRIEND_LIST,
+        FRIEND_LIST,              
         PRIVATE_CHAT,
         GROUP_CHAT,
-        // Add more types as needed
+        // ...
     };
 
     // Constructors

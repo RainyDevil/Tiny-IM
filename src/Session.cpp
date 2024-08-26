@@ -34,6 +34,7 @@ void Session::readMessage() {
                 std::string json_data = beast::buffers_to_string(buffer_.data());
                 buffer_.consume(length); // Clear the buffer
                 try {
+                    std::cout << "[LOG] JSON meta data : " << json_data << std::endl; 
                     Message msg = Message::fromJson(json_data);
                     businessHandler_->handleIncomingMessage(self, msg);
                 } catch (const std::exception& e) {

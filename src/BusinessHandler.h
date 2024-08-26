@@ -18,6 +18,7 @@ private:
     void addFriend(int userId, int friendId);
     void sendMessageToUser(int fromUserId, int toUserId, const std::string& content);
     void sendGroupMessage(int fromUserId, int groupId, const std::string& content);
+    void ackAddFriend(int fromUserId, int toUserId, const std::string& content);
     std::vector<int> getFriendList(int userId);
 
 private:
