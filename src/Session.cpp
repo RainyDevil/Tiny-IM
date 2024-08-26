@@ -72,7 +72,9 @@ void Session::write() {
             if (!ec) {
                 write_msgs_.pop_front();
                 if (!write_msgs_.empty()) {
-                    write();
+                    if(ws_.is_open()){
+                        write();
+                    }
                 }
             } else {
                 std::cerr << "WebSocket write error: " << ec.message() << std::endl;
