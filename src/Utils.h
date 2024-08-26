@@ -2,9 +2,11 @@
 #define UTILS_H
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
 #include <chrono>
 #include <ctime>
-#include <sstream>
 #include <iomanip>
 #include <string>
 #include <stdexcept>
@@ -46,6 +48,51 @@ public:
             throw std::runtime_error("Failed to parse date string");
         }
         return mktime(&tm);
+    }
+
+    static std::vector<std::string> split(const std::string& str, char delimiter) {
+        std::vector<std::string> tokens;
+        std::stringstream ss(str);
+        std::string item;
+        while (std::getline(ss, item, delimiter)) {
+            tokens.push_back(item);
+        }
+        return tokens;
+    }
+
+// Function to get process stats from /proc/[pid]/stat
+    static void printProcessStats(int pid) {
+        std::ifstream statFile("/proc/" + std::to_string(pid) + "/stat");
+        if (!statFile.is_open()) {
+            std::cerr << "Error opening file: /proc/" << pid << "/stat" << std::endl;
+            return;
+        }
+
+        std::string line;
+        std::getline(statFile, line);
+        statFile.close();
+
+        // Split the line into tokens
+        std::vector<std::string> tokens = split(line, ' ');
+
+        if (tokens.size() < 22) {
+            std::cerr << "Unexpected format in /proc/" << pid << "/stat" << std::endl;
+            return;
+        }
+
+        // Extract relevant fields
+        std::string processName = tokens[1];
+        long utime = std::stol(tokens[13]);  // User mode jiffies
+        long stime = std::stol(tokens[14]);  // Kernel mode jiffies
+        long vsize = std::stol(tokens[22]);  // Virtual memory size in bytes
+        long rss = std::stol(tokens[23]);    // Resident Set Size (pages)
+
+        std::cout << "Process ID: " << pid << std::endl;
+        std::cout << "Process Name: " << processName << std::endl;
+        std::cout << "User Time (jiffies): " << utime << std::endl;
+        std::cout << "System Time (jiffies): " << stime << std::endl;
+        std::cout << "Virtual Memory Size (bytes): " << vsize << std::endl;
+        std::cout << "Resident Set Size (pages): " << rss << std::endl;
     }
 };
 
