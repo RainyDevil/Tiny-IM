@@ -44,26 +44,26 @@ std::shared_ptr<DatabaseConnection> Database::getConnection() {
     return conn;
 }
 
-std::optional<std::string> Database::registerUser(const std::string& password) {
+std::optional<std::string> Database::registerUser(const std::string& password, const std::string& username) {
     auto conn = getConnection();
-    int user_id = generateUUID();
+    std::string user_id = generateUUID();
     std::string salt = generateSalt();
     std::string password_hash = hashPassword(password, salt);
 
     sqlite3_stmt* stmt;
-    std::string query = "INSERT INTO users (user_id, password_hash, salt) VALUES (?, ?, ?)";
+    std::string query = "INSERT INTO users (user_id, password_hash, salt, username) VALUES (?, ?, ?, ?)";
     if (sqlite3_prepare_v2(conn->getConnection(), query.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
         return std::nullopt;
     }
-    std::string user_id_string = std::to_string(user_id);
-    sqlite3_bind_text(stmt, 1, user_id_string.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 1, user_id.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, password_hash.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 3, salt.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 4, username.c_str(), -1, SQLITE_STATIC);
 
     bool success = (sqlite3_step(stmt) == SQLITE_DONE);
     sqlite3_finalize(stmt);
 
-    return success ? std::optional<std::string>{user_id_string} : std::nullopt;
+    return success ? std::optional<std::string>{user_id} : std::nullopt;
 }
 
 bool Database::setUsername(const std::string& user_id, const std::string& username) {
@@ -81,27 +81,27 @@ bool Database::setUsername(const std::string& user_id, const std::string& userna
     return success;
 }
 
-std::optional<std::string> Database::authenticateUser(const std::string& username, const std::string& password) {
+std::optional<std::string> Database::authenticateUser(const std::string& uuid, const std::string& password) {
     auto conn = getConnection();
     sqlite3_stmt* stmt;
-    std::string query = "SELECT user_id, password_hash, salt FROM users WHERE username = ?";
+    std::string query = "SELECT username, password_hash, salt FROM users WHERE user_id = ?";
     if (sqlite3_prepare_v2(conn->getConnection(), query.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
         return std::nullopt;
     }
-    sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 1, uuid.c_str(), -1, SQLITE_STATIC);
 
-    std::optional<std::string> user_id;
+    std::optional<std::string> username;
     std::string stored_hash, salt;
 
     if (sqlite3_step(stmt) == SQLITE_ROW) {
-        user_id = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        username = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
         stored_hash = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
         salt = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
     }
     sqlite3_finalize(stmt);
 
-    if (user_id && hashPassword(password, salt) == stored_hash) {
-        return user_id;
+    if (username && hashPassword(password, salt) == stored_hash) {
+        return username;
     }
     return std::nullopt;
 }
@@ -124,13 +124,18 @@ std::optional<std::string> Database::getUserNameById(const std::string& user_id)
     return username;
 }
 
-// Helper functions
-int Database::generateUUID() {
+// Helper functions 9位uuid
+std::string Database::generateUUID() {
+    const std::string chars = "0123456789";
     std::random_device rd;  // 使用随机设备
-    std::mt19937 gen(rd()); // 以随机设备为种子初始化随机数生成器
-    std::uniform_int_distribution<int> dist(1000000000, 1410065407); // 10位整数的范围
+    std::mt19937 gen(rd()); // 梅森旋转算法
+    std::uniform_int_distribution<> dist(0, chars.size() - 1);
 
-    return dist(gen);
+    std::string result;
+    for (int i = 0; i < 9; ++i) {
+        result += chars[dist(gen)];
+    }
+    return result;
 }
 
 std::string Database::generateSalt() {

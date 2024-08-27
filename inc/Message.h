@@ -8,13 +8,15 @@
 class Message {
 public:
     enum class MessageType {
+        SIGN_UP,
+        SIGN_UP_RESPONSE,
         LOGIN,
         LOGIN_RESPONSE,
         LOGOUT,
         TEXT,
         ADD_FRIEND,              //  user1  ---ADD_FRIEND-------------->  服务器
         FRIEND_REQUEST,          //  服务器  ---FRIEND_REQUEST---------->  user2
-        FRIEND_REQUEST_RESPONSE, //  user2  ---FRIEND_REQUEST_RESPONSE--> 服务器
+        FRIEND_REQUEST_RESPONSE, //  user2  ---FRIEND_REQUEST_RESPONSE--> 服务器 accept or reject
         FRIEND_LIST,              
         PRIVATE_CHAT,
         GROUP_CHAT,

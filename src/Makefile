@@ -164,6 +164,30 @@ BusinessHandler.cpp.s:
 	cd /root/test/chatroom && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/ChatServer.dir/build.make src/CMakeFiles/ChatServer.dir/BusinessHandler.cpp.s
 .PHONY : BusinessHandler.cpp.s
 
+Database.o: Database.cpp.o
+.PHONY : Database.o
+
+# target to build an object file
+Database.cpp.o:
+	cd /root/test/chatroom && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/ChatServer.dir/build.make src/CMakeFiles/ChatServer.dir/Database.cpp.o
+.PHONY : Database.cpp.o
+
+Database.i: Database.cpp.i
+.PHONY : Database.i
+
+# target to preprocess a source file
+Database.cpp.i:
+	cd /root/test/chatroom && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/ChatServer.dir/build.make src/CMakeFiles/ChatServer.dir/Database.cpp.i
+.PHONY : Database.cpp.i
+
+Database.s: Database.cpp.s
+.PHONY : Database.s
+
+# target to generate assembly for a file
+Database.cpp.s:
+	cd /root/test/chatroom && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/ChatServer.dir/build.make src/CMakeFiles/ChatServer.dir/Database.cpp.s
+.PHONY : Database.cpp.s
+
 Message.o: Message.cpp.o
 .PHONY : Message.o
 
@@ -273,6 +297,9 @@ help:
 	@echo "... BusinessHandler.o"
 	@echo "... BusinessHandler.i"
 	@echo "... BusinessHandler.s"
+	@echo "... Database.o"
+	@echo "... Database.i"
+	@echo "... Database.s"
 	@echo "... Message.o"
 	@echo "... Message.i"
 	@echo "... Message.s"

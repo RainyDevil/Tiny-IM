@@ -1,6 +1,6 @@
 #include "Message.h"
 #include <nlohmann/json.hpp>
-
+#include <iostream>
 using json = nlohmann::json;
 
 // Constructors
@@ -83,6 +83,8 @@ Message Message::fromJson(const std::string& jsonString) {
 
 // Helper function to convert string to MessageType
 Message::MessageType Message::stringToMessageType(const std::string& typeStr) {
+    if (typeStr == "SIGN_UP") return MessageType::SIGN_UP;
+    if (typeStr == "SIGN_UP_RESPONSE") return MessageType::SIGN_UP_RESPONSE;
     if (typeStr == "LOGIN") return MessageType::LOGIN;
     if (typeStr == "LOGIN_RESPONSE") return MessageType::LOGIN_RESPONSE;
     if (typeStr == "LOGOUT") return MessageType::LOGOUT;
@@ -100,6 +102,8 @@ Message::MessageType Message::stringToMessageType(const std::string& typeStr) {
 // Helper function to convert MessageType to string
 std::string Message::messageTypeToString(MessageType type) {
     switch (type) {
+        case MessageType::SIGN_UP: return "SIGN_UP";
+        case MessageType::SIGN_UP_RESPONSE: return "SIGN_UP_RESPONSE";
         case MessageType::LOGIN: return "LOGIN";
         case MessageType::LOGIN_RESPONSE: return "LOGIN_RESPONSE";
         case MessageType::LOGOUT: return "LOGOUT";

@@ -21,7 +21,8 @@ public:
     void handleIncomingMessage(const std::shared_ptr<Session>& session, const Message& msg);
     void handleDisconnection(const std::shared_ptr<Session>& session);
 private:
-    void loginUser(int userId, const std::shared_ptr<Session>& session);
+    void signUp(const Message& msg,const std::shared_ptr<Session>& session);
+    void loginUser(const Message& msg, const std::shared_ptr<Session>& session);
     void logoutUser(int userId,const std::shared_ptr<Session>& session);
     void addFriend(int userId, int friendId);
     void sendMessageToUser(int fromUserId, int toUserId, const std::string& content);

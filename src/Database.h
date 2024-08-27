@@ -28,7 +28,7 @@ public:
     std::shared_ptr<DatabaseConnection> getConnection();
 
     // User operations
-    std::optional<std::string> registerUser(const std::string& password);
+    std::optional<std::string> registerUser(const std::string& password, const std::string& username);
     bool setUsername(const std::string& user_id, const std::string& username);
     std::optional<std::string> authenticateUser(const std::string& username, const std::string& password);
     std::optional<std::string> getUserNameById(const std::string& user_id);
@@ -55,7 +55,7 @@ private:
     std::mutex mutex_;
     std::condition_variable cond_var_;
 
-    int generateUUID();
+    std::string generateUUID();
     std::string hashPassword(const std::string& password, const std::string& salt);
     std::string generateSalt();
 };

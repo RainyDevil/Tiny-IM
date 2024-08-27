@@ -4,25 +4,27 @@
 void BusinessHandler::handleIncomingMessage(const std::shared_ptr<Session>& session, const Message& msg) {    
     int from_userId = msg.getFromUserId();
     int to_userId = msg.getToUserId();
+    int messageId = msg.getMessageId();
     switch (msg.getMessageType()) {
+        case Message::MessageType::SIGN_UP:
+            signUp(msg, session);
+            std::cout << Utils::unixTimestampToDate(msg.getTimestamp()) << std::endl;
+            break;
         case Message::MessageType::LOGIN:
-            loginUser(from_userId, session);
+            loginUser(msg, session);
             std::cout << Utils::unixTimestampToDate(msg.getTimestamp()) << std::endl;
             break;
         case Message::MessageType::LOGOUT:
             logoutUser(from_userId, session);
             break;
         case Message::MessageType::TEXT:{
-
-            nlohmann::json j;
-            j["userName"] = std::to_string(from_userId);
-            j["text"] = msg.getContent();
+            /// TODO 
             // 0 代表公共聊天室
             if(to_userId == 0)
             {
-                sendGroupMessage(from_userId, to_userId, j.dump(), session);
+                sendGroupMessage(from_userId, to_userId, msg.getContent(), session);
             } else{
-                sendMessageToUser(from_userId, to_userId, j.dump());
+                sendMessageToUser(from_userId, to_userId, msg.getContent());
             }
             break;
         }
@@ -74,18 +76,55 @@ void BusinessHandler::handleIncomingMessage(const std::shared_ptr<Session>& sess
             std::cerr << "Unknown message type received" << std::endl;
     }
 }
-// login
-void BusinessHandler::loginUser(int userId, const std::shared_ptr<Session>& session) {
-    if (userSessions_.find(userId) != userSessions_.end()) {
-        std::cerr << "User " << userId << " is already logged in." << std::endl;
-        Message msg(userId, 0,Message::MessageType::LOGIN_RESPONSE, 1, "notfind");
+//sign up
+void BusinessHandler::signUp(const Message& msg,const std::shared_ptr<Session>& session) {
+    nlohmann::json j = nlohmann::json::parse(msg.getContent());
+    std::string password = j["password"];
+    std::string username = j["username"];
+    Database& db = Database::getInstance();
+    std::optional<std::string> uuid = db.registerUser(password, username);
+    if(uuid.has_value()){
+        Message msg(-1, -1, Message::MessageType::SIGN_UP_RESPONSE, msg.getMessageId() + 1, uuid.value());
         session->send(msg);
+    } else {
         return;
     }
-    userSessions_[userId] = session;
-    Message msg(userId, 0,Message::MessageType::LOGIN_RESPONSE, 1, "success");
-    session->send(msg);
-    std::cout << "User " << userId << " logged in." << std::endl;
+}
+// login
+void BusinessHandler::loginUser(const Message& msg, const std::shared_ptr<Session>& session) {
+    Database& db = Database::getInstance();
+    int userId = msg.getFromUserId();
+    std::optional<std::string> username = db.authenticateUser(std::to_string(userId), msg.getContent());//content 只有password，非JSON格式
+    //只有一人可以登号
+    if(username.has_value()){
+        if (userSessions_.find(userId) != userSessions_.end()) {
+            std::cerr << "User " << userId << " is already logged in." << std::endl;
+            nlohmann::json j;
+            j["status"] = "fail";
+            j["username"] = " ";
+            j["reason"] = "repeated login";
+            Message msg(userId, 0,Message::MessageType::LOGIN_RESPONSE,  msg.getMessageId() + 1, j.dump());
+            session->send(msg);
+            return;
+        } else {
+            userSessions_[userId] = session;
+            nlohmann::json j;
+            j["status"] = "success";
+            j["username"] = username.value();
+            Message msg(userId, 0,Message::MessageType::LOGIN_RESPONSE, msg.getMessageId() + 1, j.dump());
+            session->send(msg);
+            std::cout << "User " << userId << " logged in." << std::endl;
+        }
+    }
+    else{
+        nlohmann::json j;
+        j["status"] = "fail";
+        j["username"] = " ";
+        j["reason"] = "authenticate fail";
+        Message msg(userId, 0,Message::MessageType::LOGIN_RESPONSE,  msg.getMessageId() + 1, j.dump());
+        session->send(msg);
+    }
+
 }
 
 // logout
