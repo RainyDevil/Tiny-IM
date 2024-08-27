@@ -46,7 +46,7 @@ std::shared_ptr<DatabaseConnection> Database::getConnection() {
 
 std::optional<std::string> Database::registerUser(const std::string& password) {
     auto conn = getConnection();
-    std::string user_id = generateUUID();
+    int user_id = generateUUID();
     std::string salt = generateSalt();
     std::string password_hash = hashPassword(password, salt);
 
@@ -55,15 +55,15 @@ std::optional<std::string> Database::registerUser(const std::string& password) {
     if (sqlite3_prepare_v2(conn->getConnection(), query.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
         return std::nullopt;
     }
-
-    sqlite3_bind_text(stmt, 1, user_id.c_str(), -1, SQLITE_STATIC);
+    std::string user_id_string = std::to_string(user_id);
+    sqlite3_bind_text(stmt, 1, user_id_string.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, password_hash.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 3, salt.c_str(), -1, SQLITE_STATIC);
 
     bool success = (sqlite3_step(stmt) == SQLITE_DONE);
     sqlite3_finalize(stmt);
 
-    return success ? std::optional<std::string>{user_id} : std::nullopt;
+    return success ? std::optional<std::string>{user_id_string} : std::nullopt;
 }
 
 bool Database::setUsername(const std::string& user_id, const std::string& username) {
@@ -128,7 +128,7 @@ std::optional<std::string> Database::getUserNameById(const std::string& user_id)
 int Database::generateUUID() {
     std::random_device rd;  // 使用随机设备
     std::mt19937 gen(rd()); // 以随机设备为种子初始化随机数生成器
-    std::uniform_int_distribution<int> dist(1000000000, 9999999999); // 10位整数的范围
+    std::uniform_int_distribution<int> dist(1000000000, 1410065407); // 10位整数的范围
 
     return dist(gen);
 }

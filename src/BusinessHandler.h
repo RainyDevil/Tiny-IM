@@ -2,6 +2,7 @@
 #include "Message.h"
 #include "Utils.h"
 #include "Database.h"
+#include "Config.h"
 #include <unordered_map>
 #include <memory>
 #include <string>
@@ -10,6 +11,12 @@
 class Session; // Forward declaration
 
 class BusinessHandler {
+public: 
+        BusinessHandler(){
+            Database& db = Database::getInstance();
+            Config& config = Config::getInstance();
+            db.init(config.getDbName(), config.getConnectionSize());
+        }
 public:
     void handleIncomingMessage(const std::shared_ptr<Session>& session, const Message& msg);
     void handleDisconnection(const std::shared_ptr<Session>& session);

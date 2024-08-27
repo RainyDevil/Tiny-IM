@@ -1,7 +1,7 @@
 #include "BusinessHandler.h"
 #include "Session.h"
 
-void BusinessHandler::handleIncomingMessage(const std::shared_ptr<Session>& session, const Message& msg) {
+void BusinessHandler::handleIncomingMessage(const std::shared_ptr<Session>& session, const Message& msg) {    
     int from_userId = msg.getFromUserId();
     int to_userId = msg.getToUserId();
     switch (msg.getMessageType()) {

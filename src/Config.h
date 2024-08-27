@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -15,7 +16,7 @@ public:
     std::string getDbName() const { return dbName_; }
     std::string getHost() const { return host_; }
     std::string getLogLevel() const { return logLevel_; }
-
+    int getConnectionSize() const { return connectionSize_; }
 private:
     // 构造函数私有化
     Config() {
@@ -40,6 +41,7 @@ private:
             dbName_ = configJson.at("db_name").get<std::string>();
             host_ = configJson.at("host").get<std::string>();
             logLevel_ = configJson.at("log_level").get<std::string>();
+            connectionSize_ = configJson.at("connection_size").get<int>();
 
         } catch (const std::exception& e) {
             std::cerr << "Error reading config file: " << e.what() << std::endl;
@@ -50,4 +52,5 @@ private:
     std::string dbName_;
     std::string host_;
     std::string logLevel_;
+    int connectionSize_;
 };

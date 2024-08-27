@@ -55,7 +55,7 @@ private:
     std::mutex mutex_;
     std::condition_variable cond_var_;
 
-    std::string generateUUID();
+    int generateUUID();
     std::string hashPassword(const std::string& password, const std::string& salt);
     std::string generateSalt();
 };
