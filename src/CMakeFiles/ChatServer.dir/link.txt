@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -O0 CMakeFiles/ChatServer.dir/main.cpp.o CMakeFiles/ChatServer.dir/Server.cpp.o CMakeFiles/ChatServer.dir/Session.cpp.o CMakeFiles/ChatServer.dir/BusinessHandler.cpp.o CMakeFiles/ChatServer.dir/Message.cpp.o -o ChatServer 

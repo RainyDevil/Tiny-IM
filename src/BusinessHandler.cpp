@@ -13,10 +13,17 @@ void BusinessHandler::handleIncomingMessage(const std::shared_ptr<Session>& sess
             logoutUser(from_userId, session);
             break;
         case Message::MessageType::TEXT:{
+
             nlohmann::json j;
             j["userName"] = std::to_string(from_userId);
             j["text"] = msg.getContent();
-            sendMessageToUser(from_userId, to_userId, j.dump());
+            // 0 代表公共聊天室
+            if(to_userId == 0)
+            {
+                sendGroupMessage(from_userId, to_userId, j.dump(), session);
+            } else{
+                sendMessageToUser(from_userId, to_userId, j.dump());
+            }
             break;
         }
         case Message::MessageType::ADD_FRIEND:
@@ -61,7 +68,7 @@ void BusinessHandler::handleIncomingMessage(const std::shared_ptr<Session>& sess
             sendMessageToUser(from_userId, to_userId, msg.getContent());
             break;
         case Message::MessageType::GROUP_CHAT:
-            sendGroupMessage(from_userId, to_userId, msg.getContent());
+            sendGroupMessage(from_userId, to_userId, msg.getContent(), session);
             break;
         default:
             std::cerr << "Unknown message type received" << std::endl;
@@ -162,16 +169,24 @@ void BusinessHandler::sendMessageToUser(int fromUserId, int toUserId, const std:
 }
 
 // 群聊消息
-void BusinessHandler::sendGroupMessage(int fromUserId, int groupId, const std::string& content) {
-    auto it = groupChats_.find(groupId);
-    if (it != groupChats_.end()) {
-        for (int memberId : it->second) {
-            sendMessageToUser(fromUserId, memberId, content);
+void BusinessHandler::sendGroupMessage(int fromUserId, int groupId, const std::string& content, const std::shared_ptr<Session>& session) {
+    for (auto it = userSessions_.begin(); it != userSessions_.end(); ) {
+        if(it->second != session){
+            Message msg(fromUserId, groupId,Message::MessageType::TEXT, groupId, content);
+            it->second->send(msg);
         }
+        it++;
         std::cout << "Sent group message from User " << fromUserId << " to Group " << groupId << ": " << content << std::endl;
-    } else {
-        std::cerr << "Group " << groupId << " not found." << std::endl;
     }
+    // auto it = groupChats_.find(groupId);
+    // if (it != groupChats_.end()) {
+    //     for (int memberId : it->second) {
+    //         sendMessageToUser(fromUserId, memberId, content);
+    //     }
+    //     std::cout << "Sent group message from User " << fromUserId << " to Group " << groupId << ": " << content << std::endl;
+    // } else {
+    //     std::cerr << "Group " << groupId << " not found." << std::endl;
+    // }
 }
 void BusinessHandler::handleDisconnection(const std::shared_ptr<Session>& session) {
     for (auto it = userSessions_.begin(); it != userSessions_.end(); ) {

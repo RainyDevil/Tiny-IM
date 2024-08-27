@@ -1,6 +1,7 @@
 #pragma once
 #include "Message.h"
 #include "Utils.h"
+#include "Database.h"
 #include <unordered_map>
 #include <memory>
 #include <string>
@@ -17,7 +18,7 @@ private:
     void logoutUser(int userId,const std::shared_ptr<Session>& session);
     void addFriend(int userId, int friendId);
     void sendMessageToUser(int fromUserId, int toUserId, const std::string& content);
-    void sendGroupMessage(int fromUserId, int groupId, const std::string& content);
+    void sendGroupMessage(int fromUserId, int groupId, const std::string& content, const std::shared_ptr<Session>& session);
     void ackAddFriend(int fromUserId, int toUserId, const std::string& content);
     std::vector<int> getFriendList(int userId);
 

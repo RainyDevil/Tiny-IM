@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>311 Chat Room</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="loading" class="loading"></div>
+    <div id="loginContainer">
+        <div class="login-box">
+            <h2>Login to Chat</h2>
+            <form id="loginForm">
+                <input type="text" id="userId" placeholder="Enter your User ID" required>
+                <input type="password" id="password" placeholder="Enter your Password" required>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+    </div>
+    <div class="chat-container" style="display: none;">
+        <div class="sidebar">
+            <div class="profile">
+                <img src="profile.png" alt="User Profile" class="profile-img">
+                <div class="profile-info">
+                    <h2 id="username">Username</h2>
+                    <p id="status">Offline</p>
+                </div>
+            </div>
+            <ul class="chat-list" id="chatList">
+                <li class="chat-item selected" data-chat="public-chat">Public Chat Room</li>
+                <li class="chat-item" data-chat="friends-list">Friends List</li>
+                <ul id="friendsList" class="chat-list" style="display: none;">
+                    <!-- 好友项 -->
+                </ul>
+                <li class="chat-item" id="friendRequestNotification" style="display: none;">
+                    Friend Requests <span class="notification-dot"></span>
+                </li>
+                <div class="add-friend">
+                    <h3>Add Friend</h3>
+                    <input type="text" id="friendIdInput" placeholder="Enter Friend's ID">
+                    <button id="addFriendButton">Add Friend</button>
+                </div>
+            </ul>
+        </div>
+        <div class="chat-main">
+            <header class="chat-header">
+                <h2 id="chatTitle">Public Chat Room</h2>
+            </header>
+            <div class="chat-messages" id="chatMessages">
+                <!-- Messages  here -->
+            </div>
+            <form class="chat-form" id="chatForm">
+                <button type="button" id="emojiButton" class="emoji-button">😊</button>
+                <div id="emojiPicker" class="emoji-picker">
+                    <!-- 表情面板将通过 JavaScript 动态生成 -->
+                </div>
+                <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off" required>
+                <button type="button" id="fileButton" class="file-button">File</button>
+                <input type="file" id="fileInput" style="display:none;">
+                <button type="submit" class="send-button">Send</button>
+            </form>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
