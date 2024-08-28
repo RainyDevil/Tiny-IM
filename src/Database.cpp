@@ -390,7 +390,7 @@ bool Database::markMessagesAsRead(const std::string& user_id) {
 }
 // Helper functions 9位uuid
 std::string Database::generateUUID() {
-    const std::string chars = "0123456789";
+    const std::string chars = "123456789";
     std::random_device rd;  // 使用随机设备
     std::mt19937 gen(rd()); // 梅森旋转算法
     std::uniform_int_distribution<> dist(0, chars.size() - 1);
