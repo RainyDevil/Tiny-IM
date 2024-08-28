@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/ChatServer.dir/src/main.cpp.o CMakeFiles/ChatServer.dir/src/chat_server.cpp.o -o ChatServer  /usr/lib/x86_64-linux-gnu/libboost_system.so.1.74.0 

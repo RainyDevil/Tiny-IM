@@ -1,7 +1,0 @@
-/root/test/chatroom/CMakeFiles/test.dir
-/root/test/chatroom/CMakeFiles/edit_cache.dir
-/root/test/chatroom/CMakeFiles/rebuild_cache.dir
-/root/test/chatroom/src/CMakeFiles/ChatServer.dir
-/root/test/chatroom/src/CMakeFiles/test.dir
-/root/test/chatroom/src/CMakeFiles/edit_cache.dir
-/root/test/chatroom/src/CMakeFiles/rebuild_cache.dir

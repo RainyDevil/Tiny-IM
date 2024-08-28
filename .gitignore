@@ -7,11 +7,11 @@ CTestTestfile.cmake
 *.cmake
 
 # Build directories
-build/
-Debug/
-Release/
-RelWithDebInfo/
-MinSizeRel/
+./build/
+./Debug/
+./Release/
+./RelWithDebInfo/
+./MinSizeRel/
 
 # Binary files
 *.o
@@ -26,11 +26,11 @@ Dependencies/
 external/
 
 # IDE-specific files (if using certain IDEs, uncomment as needed)
-# .vscode/
-# .idea/
-# *.suo
-# *.user
-# *.swp
+.vscode/
+.idea/
+*.suo
+*.user
+*.swp
 
 # MacOS Finder
 .DS_Store
