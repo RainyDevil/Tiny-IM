@@ -24,12 +24,12 @@ void BusinessHandler::handleIncomingMessage(const std::shared_ptr<Session>& sess
             {
                 sendGroupMessage(from_userId, to_userId, msg.getContent(), session);
             } else{
-                sendMessageToUser(from_userId, to_userId, msg.getContent());
+                sendMessageToUser(msg);
             }
             break;
         }
         case Message::MessageType::ADD_FRIEND:
-            addFriend(msg); // messageId 被用作 friendId
+            addFriend(msg); 
             break;
         case Message::MessageType::FRIEND_LIST:{
             sendFriendList(msg, session);
@@ -39,7 +39,7 @@ void BusinessHandler::handleIncomingMessage(const std::shared_ptr<Session>& sess
             ackAddFriend(msg);
             break;   
         case Message::MessageType::PRIVATE_CHAT:
-            sendMessageToUser(from_userId, to_userId, msg.getContent());
+            sendMessageToUser(msg);
             break;
         case Message::MessageType::GROUP_CHAT:
             sendGroupMessage(from_userId, to_userId, msg.getContent(), session);
@@ -119,6 +119,7 @@ void BusinessHandler::addFriend(const Message& msg) {
     Database& db = Database::getInstance();
     if(!db.addFriend(std::to_string(userId), std::to_string(friendId))) {
         std::cout << "Database excute [addFriend()] failed ! " << std::endl;
+        return ;
     };
     std::optional<std::string> username = db.getUserNameById(std::to_string(userId));
     if(username.has_value()){
@@ -179,10 +180,13 @@ void BusinessHandler::ackAddFriend(const Message& msg) {
     // }
 }
 // 发送私信
-void BusinessHandler::sendMessageToUser(int fromUserId, int toUserId, const std::string& content) {
+void BusinessHandler::sendMessageToUser(const Message& msg) {
+    int fromUserId = msg.getFromUserId();
+    int toUserId = msg.getToUserId();
+    std::string content = msg.getContent();
     auto it = userSessions_.find(toUserId);
     if (it != userSessions_.end()) {
-        Message msg(fromUserId, toUserId,Message::MessageType::TEXT, toUserId, content);
+        Message msg(fromUserId, toUserId,Message::MessageType::TEXT, msg.getMessageId() + 1, content);
         it->second->send(msg);
         std::cout << "Sent message from User " << fromUserId << " to User " << toUserId << ": " << content << std::endl;
     } else {

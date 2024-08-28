@@ -25,7 +25,7 @@ private:
     void loginUser(const Message& msg, const std::shared_ptr<Session>& session);
     void logoutUser(int userId,const std::shared_ptr<Session>& session);
     void addFriend(const Message& msg);
-    void sendMessageToUser(int fromUserId, int toUserId, const std::string& content);
+    void sendMessageToUser(const Message& msg);
     void sendGroupMessage(int fromUserId, int groupId, const std::string& content, const std::shared_ptr<Session>& session);
     void ackAddFriend(const Message& msg);
     void sendFriendList(const Message& msg, const std::shared_ptr<Session>& session);

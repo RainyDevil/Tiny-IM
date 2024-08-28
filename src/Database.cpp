@@ -132,14 +132,20 @@ std::optional<std::string> Database::getUserNameById(const std::string& user_id)
 bool Database::addFriend(const std::string& user_id, const std::string& friend_id) {
     auto conn = getConnection();
     sqlite3* db = conn->getConnection();
-    //防止插入重复数据
     const char* sql = R"(
         INSERT INTO friends (user_id, friend_id, status)
         SELECT ?, ?, 0
         WHERE NOT EXISTS (
             SELECT 1 FROM friends WHERE user_id = ? AND friend_id = ? AND status = 1
         );
+
+        INSERT INTO friends (friend_id, user_id, status)
+        SELECT ?, ?, 0
+        WHERE NOT EXISTS (
+            SELECT 1 FROM friends WHERE user_id = ? AND friend_id = ? AND status = 1
+        );
     )";
+
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
         std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
@@ -150,6 +156,10 @@ bool Database::addFriend(const std::string& user_id, const std::string& friend_i
     sqlite3_bind_text(stmt, 2, friend_id.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 3, user_id.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 4, friend_id.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 5, friend_id.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 6, user_id.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 7, friend_id.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 8, user_id.c_str(), -1, SQLITE_STATIC);
 
     bool result = (sqlite3_step(stmt) == SQLITE_DONE);
     sqlite3_finalize(stmt);
