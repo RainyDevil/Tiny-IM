@@ -44,6 +44,9 @@ void BusinessHandler::handleIncomingMessage(const std::shared_ptr<Session>& sess
         case Message::MessageType::GROUP_CHAT:
             sendGroupMessage(from_userId, to_userId, msg.getContent(), session);
             break;
+        case Message::MessageType::PULL_MESSAGE:
+            sendGroupMessage(from_userId, to_userId, msg.getContent(), session);
+            break;
         default:
             std::cerr << "Unknown message type received" << std::endl;
     }
@@ -183,8 +186,14 @@ void BusinessHandler::ackAddFriend(const Message& msg) {
 void BusinessHandler::sendMessageToUser(const Message& msg) {
     int fromUserId = msg.getFromUserId();
     int toUserId = msg.getToUserId();
+    Database& db = Database::getInstance();
     std::string content = msg.getContent();
     auto it = userSessions_.find(toUserId);
+    if(db.storeMessage(std::to_string(fromUserId), std::to_string(toUserId), Message::MessageType::TEXT, msg.getMessageId, content)){
+       std::cout << "Database excute [storeMessage()] sucess ! " << std::endl;
+    } else {
+       std::cout << "Database excute [storeMessage()] fail ! " << std::endl;
+    }
     if (it != userSessions_.end()) {
         Message msg(fromUserId, toUserId,Message::MessageType::TEXT, msg.getMessageId() + 1, content);
         it->second->send(msg);

@@ -20,6 +20,7 @@ public:
         FRIEND_LIST,              
         PRIVATE_CHAT,
         GROUP_CHAT,
+        PULL_MESSAGE,
         // ...
     };
 

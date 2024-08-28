@@ -83,6 +83,7 @@ Message Message::fromJson(const std::string& jsonString) {
 
 // Helper function to convert string to MessageType
 Message::MessageType Message::stringToMessageType(const std::string& typeStr) {
+    if (typeStr == "PULL_MESSAGE") return MessageType::PULL_MESSAGE;
     if (typeStr == "SIGN_UP") return MessageType::SIGN_UP;
     if (typeStr == "SIGN_UP_RESPONSE") return MessageType::SIGN_UP_RESPONSE;
     if (typeStr == "LOGIN") return MessageType::LOGIN;
@@ -114,6 +115,7 @@ std::string Message::messageTypeToString(MessageType type) {
         case MessageType::GROUP_CHAT: return "GROUP_CHAT";
         case MessageType::FRIEND_REQUEST: return "FRIEND_REQUEST";
         case MessageType::FRIEND_REQUEST_RESPONSE: return "FRIEND_REQUEST_RESPONSE";
+        case MessageType::PULL_MESSAGE: return "PULL_MESSAGE";
         // Add more mappings as needed
         default: throw std::invalid_argument("Unknown message type");
     }
