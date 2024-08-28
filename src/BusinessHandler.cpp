@@ -45,7 +45,7 @@ void BusinessHandler::handleIncomingMessage(const std::shared_ptr<Session>& sess
             sendGroupMessage(from_userId, to_userId, msg.getContent(), session);
             break;
         case Message::MessageType::PULL_MESSAGE:
-            sendGroupMessage(from_userId, to_userId, msg.getContent(), session);
+            pullMessage(msg, session);
             break;
         default:
             std::cerr << "Unknown message type received" << std::endl;
@@ -189,13 +189,16 @@ void BusinessHandler::sendMessageToUser(const Message& msg) {
     Database& db = Database::getInstance();
     std::string content = msg.getContent();
     auto it = userSessions_.find(toUserId);
-    if(db.storeMessage(std::to_string(fromUserId), std::to_string(toUserId), Message::MessageType::TEXT, msg.getMessageId, content)){
+    if(db.storeMessage(std::to_string(fromUserId), 
+       std::to_string(toUserId), 
+       Message::messageTypeToString(Message::MessageType::TEXT), 
+       content)){
        std::cout << "Database excute [storeMessage()] sucess ! " << std::endl;
     } else {
        std::cout << "Database excute [storeMessage()] fail ! " << std::endl;
     }
     if (it != userSessions_.end()) {
-        Message msg(fromUserId, toUserId,Message::MessageType::TEXT, msg.getMessageId() + 1, content);
+        Message msg(fromUserId, toUserId, Message::MessageType::TEXT, msg.getMessageId() + 1, content);
         it->second->send(msg);
         std::cout << "Sent message from User " << fromUserId << " to User " << toUserId << ": " << content << std::endl;
     } else {

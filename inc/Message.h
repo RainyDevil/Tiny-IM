@@ -55,7 +55,7 @@ private:
     int messageId_;
     std::string content_;
     std::time_t timestamp_;
-
+public:
     // Helper function for MessageType conversion
     static MessageType stringToMessageType(const std::string& typeStr);
     static std::string messageTypeToString(MessageType type);
