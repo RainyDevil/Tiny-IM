@@ -10,7 +10,41 @@
 #include <vector>
 #include <unordered_map>
 #include <optional>
+//  CREATE TABLE users (
+//     user_id TEXT PRIMARY KEY,  -- 使用 UUID 作为主键
+//     username TEXT,             -- 用户名可以为空或重复
+//     password_hash TEXT NOT NULL,  -- 存储哈希后的密码
+//     salt TEXT NOT NULL,           -- 每个用户不同的盐值
+//     status INTEGER DEFAULT 0      -- 0: offline, 1: online
+// );
 
+// CREATE TABLE friends (
+//     user_id TEXT,
+//     friend_id TEXT,
+//     status INTEGER DEFAULT 0, -- 0: pending, 1: accepted
+//     PRIMARY KEY (user_id, friend_id),
+//     FOREIGN KEY (user_id) REFERENCES users(user_id),
+//     FOREIGN KEY (friend_id) REFERENCES users(user_id)
+// );
+
+// CREATE TABLE messages (
+//     message_id INTEGER PRIMARY KEY AUTOINCREMENT,
+//     from_user_id TEXT,
+//     to_user_id TEXT,
+//     message_type TEXT,
+//     content TEXT,
+//     timestamp INTEGER,
+//     FOREIGN KEY (from_user_id) REFERENCES users(user_id),
+//     FOREIGN KEY (to_user_id) REFERENCES users(user_id)
+// );
+
+// CREATE TABLE offline_messages (
+//     message_id INTEGER PRIMARY KEY AUTOINCREMENT,
+//     user_id TEXT,
+//     content TEXT,
+//     timestamp INTEGER,
+//     FOREIGN KEY (user_id) REFERENCES users(user_id)
+// );
 class DatabaseConnection {
 public:
     DatabaseConnection(const std::string& db_file);

@@ -2,11 +2,13 @@
 #include "Server.h"
 #include "Config.h"
 int main(int argc, char* argv[]) {
+
     Config& config = Config::getInstance();
     std::cout << "Port: " << config.getPort() << std::endl;
     std::cout << "Database Name: " << config.getDbName() << std::endl;
     std::cout << "Host: " << config.getHost() << std::endl;
     std::cout << "Log Level: " << config.getLogLevel() << std::endl;
+
     while(true)
     {
         try {

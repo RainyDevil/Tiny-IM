@@ -123,7 +123,194 @@ std::optional<std::string> Database::getUserNameById(const std::string& user_id)
 
     return username;
 }
+// 添加好友
+bool Database::addFriend(const std::string& user_id, const std::string& friend_id) {
+    auto conn = getConnection();
+    sqlite3* db = conn->getConnection();
 
+    const char* sql = "INSERT INTO friends (user_id, friend_id, status) VALUES (?, ?, 0);";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    sqlite3_bind_text(stmt, 1, user_id.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, friend_id.c_str(), -1, SQLITE_STATIC);
+
+    bool result = (sqlite3_step(stmt) == SQLITE_DONE);
+    sqlite3_finalize(stmt);
+    connection_pool_.push(conn);
+    cond_var_.notify_one();
+    return result;
+}
+
+// 删除好友
+bool Database::removeFriend(const std::string& user_id, const std::string& friend_id) {
+    auto conn = getConnection();
+    sqlite3* db = conn->getConnection();
+
+    const char* sql = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?;";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    sqlite3_bind_text(stmt, 1, user_id.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, friend_id.c_str(), -1, SQLITE_STATIC);
+
+    bool result = (sqlite3_step(stmt) == SQLITE_DONE);
+    sqlite3_finalize(stmt);
+    connection_pool_.push(conn);
+    cond_var_.notify_one();
+    return result;
+}
+
+// 获取好友列表
+std::vector<std::string> Database::getFriendList(const std::string& user_id) {
+    auto conn = getConnection();
+    sqlite3* db = conn->getConnection();
+
+    const char* sql = "SELECT friend_id FROM friends WHERE user_id = ? AND status = 1;";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        return {};
+    }
+
+    sqlite3_bind_text(stmt, 1, user_id.c_str(), -1, SQLITE_STATIC);
+
+    std::vector<std::string> friends;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        friends.push_back(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)));
+    }
+
+    sqlite3_finalize(stmt);
+    connection_pool_.push(conn);
+    cond_var_.notify_one();
+    return friends;
+}
+
+// 存储消息
+bool Database::storeMessage(const std::string& from_user_id, const std::string& to_user_id, const std::string& message_type, const std::string& content) {
+    auto conn = getConnection();
+    sqlite3* db = conn->getConnection();
+
+    const char* sql = "INSERT INTO messages (from_user_id, to_user_id, message_type, content, timestamp) VALUES (?, ?, ?, ?, datetime('now'));";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    sqlite3_bind_text(stmt, 1, from_user_id.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, to_user_id.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, message_type.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 4, content.c_str(), -1, SQLITE_STATIC);
+
+    bool result = (sqlite3_step(stmt) == SQLITE_DONE);
+    sqlite3_finalize(stmt);
+    connection_pool_.push(conn);
+    cond_var_.notify_one();
+    return result;
+}
+
+// 获取最近消息
+std::vector<std::string> Database::getRecentMessages(const std::string& user_id, int days) {
+    auto conn = getConnection();
+    sqlite3* db = conn->getConnection();
+
+    const char* sql = "SELECT content FROM messages WHERE (from_user_id = ? OR to_user_id = ?) AND timestamp >= datetime('now', ? || ' days');";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        return {};
+    }
+
+    std::string day_string = "-" + std::to_string(days);
+    sqlite3_bind_text(stmt, 1, user_id.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, user_id.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, day_string.c_str(), -1, SQLITE_STATIC);
+
+    std::vector<std::string> messages;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        messages.push_back(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)));
+    }
+
+    sqlite3_finalize(stmt);
+    connection_pool_.push(conn);
+    cond_var_.notify_one();
+    return messages;
+}
+
+// 存储离线消息
+bool Database::storeOfflineMessage(const std::string& user_id, const std::string& content) {
+    auto conn = getConnection();
+    sqlite3* db = conn->getConnection();
+
+    const char* sql = "INSERT INTO offline_messages (user_id, content) VALUES (?, ?);";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    sqlite3_bind_text(stmt, 1, user_id.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, content.c_str(), -1, SQLITE_STATIC);
+
+    bool result = (sqlite3_step(stmt) == SQLITE_DONE);
+    sqlite3_finalize(stmt);
+    connection_pool_.push(conn);
+    cond_var_.notify_one();
+    return result;
+}
+
+// 获取离线消息
+std::vector<std::string> Database::getOfflineMessages(const std::string& user_id) {
+    auto conn = getConnection();
+    sqlite3* db = conn->getConnection();
+
+    const char* sql = "SELECT content FROM offline_messages WHERE user_id = ?;";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        return {};
+    }
+
+    sqlite3_bind_text(stmt, 1, user_id.c_str(), -1, SQLITE_STATIC);
+
+    std::vector<std::string> messages;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        messages.push_back(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)));
+    }
+
+    sqlite3_finalize(stmt);
+    connection_pool_.push(conn);
+    cond_var_.notify_one();
+    return messages;
+}
+
+// 标记消息为已读
+bool Database::markMessagesAsRead(const std::string& user_id) {
+    auto conn = getConnection();
+    sqlite3* db = conn->getConnection();
+
+    const char* sql = "DELETE FROM offline_messages WHERE user_id = ?;";
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    sqlite3_bind_text(stmt, 1, user_id.c_str(), -1, SQLITE_STATIC);
+
+    bool result = (sqlite3_step(stmt) == SQLITE_DONE);
+    sqlite3_finalize(stmt);
+    connection_pool_.push(conn);
+    cond_var_.notify_one();
+    return result;
+}
 // Helper functions 9位uuid
 std::string Database::generateUUID() {
     const std::string chars = "0123456789";
