@@ -70,8 +70,11 @@ public:
     // Friend operations
     bool addFriend(const std::string& user_id, const std::string& friend_id);
     bool removeFriend(const std::string& user_id, const std::string& friend_id);
+    bool ackAddFriend(const std::string& user_id, const std::string& friend_id);
     std::vector<std::string> getFriendList(const std::string& user_id);
-
+    std::vector<std::string> getFriendListUsername(const std::string& user_id);
+    std::vector<std::pair<std::string, std::string>> getFriendPair(const std::string& user_id);
+    
     // Message operations
     bool storeMessage(const std::string& from_user_id, const std::string& to_user_id, const std::string& message_type, const std::string& content);
     std::vector<std::string> getRecentMessages(const std::string& user_id, int days);

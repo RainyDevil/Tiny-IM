@@ -62,7 +62,8 @@ std::optional<std::string> Database::registerUser(const std::string& password, c
 
     bool success = (sqlite3_step(stmt) == SQLITE_DONE);
     sqlite3_finalize(stmt);
-
+    connection_pool_.push(conn);
+    cond_var_.notify_one();
     return success ? std::optional<std::string>{user_id} : std::nullopt;
 }
 
@@ -78,6 +79,8 @@ bool Database::setUsername(const std::string& user_id, const std::string& userna
 
     bool success = (sqlite3_step(stmt) == SQLITE_DONE);
     sqlite3_finalize(stmt);
+    connection_pool_.push(conn);
+    cond_var_.notify_one();
     return success;
 }
 
@@ -99,7 +102,8 @@ std::optional<std::string> Database::authenticateUser(const std::string& uuid, c
         salt = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
     }
     sqlite3_finalize(stmt);
-
+    connection_pool_.push(conn);
+    cond_var_.notify_one();
     if (username && hashPassword(password, salt) == stored_hash) {
         return username;
     }
@@ -120,15 +124,22 @@ std::optional<std::string> Database::getUserNameById(const std::string& user_id)
         username = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
     }
     sqlite3_finalize(stmt);
-
+    connection_pool_.push(conn);
+    cond_var_.notify_one();
     return username;
 }
 // 添加好友
 bool Database::addFriend(const std::string& user_id, const std::string& friend_id) {
     auto conn = getConnection();
     sqlite3* db = conn->getConnection();
-
-    const char* sql = "INSERT INTO friends (user_id, friend_id, status) VALUES (?, ?, 0);";
+    //防止插入重复数据
+    const char* sql = R"(
+        INSERT INTO friends (user_id, friend_id, status)
+        SELECT ?, ?, 0
+        WHERE NOT EXISTS (
+            SELECT 1 FROM friends WHERE user_id = ? AND friend_id = ? AND status = 1
+        );
+    )";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
         std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
@@ -137,6 +148,8 @@ bool Database::addFriend(const std::string& user_id, const std::string& friend_i
 
     sqlite3_bind_text(stmt, 1, user_id.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, friend_id.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, user_id.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 4, friend_id.c_str(), -1, SQLITE_STATIC);
 
     bool result = (sqlite3_step(stmt) == SQLITE_DONE);
     sqlite3_finalize(stmt);
@@ -144,7 +157,29 @@ bool Database::addFriend(const std::string& user_id, const std::string& friend_i
     cond_var_.notify_one();
     return result;
 }
+bool Database::ackAddFriend(const std::string& user_id, const std::string& friend_id) {
+    auto conn = getConnection();
+    sqlite3* db = conn->getConnection();
 
+    const char* sql = "UPDATE friends SET status = 1 WHERE user_id = ? AND friend_id = ?;";
+    sqlite3_stmt* stmt;
+
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+    sqlite3_bind_text(stmt, 1, user_id.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, friend_id.c_str(), -1, SQLITE_STATIC);
+
+    bool result = (sqlite3_step(stmt) == SQLITE_DONE);
+
+    sqlite3_finalize(stmt);
+    
+    connection_pool_.push(conn);
+    cond_var_.notify_one();
+
+    return result;
+}
 // 删除好友
 bool Database::removeFriend(const std::string& user_id, const std::string& friend_id) {
     auto conn = getConnection();
@@ -167,7 +202,39 @@ bool Database::removeFriend(const std::string& user_id, const std::string& frien
     return result;
 }
 
-// 获取好友列表
+// 获取好友列表username
+std::vector<std::string> Database::getFriendListUsername(const std::string& user_id) {
+    auto conn = getConnection();
+    sqlite3* db = conn->getConnection();
+
+     const char* sql = R"(
+        SELECT u.username
+        FROM friends f
+        JOIN users u ON f.friend_id = u.user_id
+        WHERE f.user_id = ? AND f.status = 1;
+    )";
+
+    sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        return {};
+    }
+
+    sqlite3_bind_text(stmt, 1, user_id.c_str(), -1, SQLITE_STATIC);
+
+    std::vector<std::string> friendUsernames;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        const char* username = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        if (username) {
+            friendUsernames.push_back(username);
+        }
+    }
+    sqlite3_finalize(stmt);
+    connection_pool_.push(conn);
+    cond_var_.notify_one();
+    return friendUsernames;
+}
+//获取好友列表id
 std::vector<std::string> Database::getFriendList(const std::string& user_id) {
     auto conn = getConnection();
     sqlite3* db = conn->getConnection();
@@ -191,7 +258,17 @@ std::vector<std::string> Database::getFriendList(const std::string& user_id) {
     cond_var_.notify_one();
     return friends;
 }
-
+std::vector<std::pair<std::string, std::string>> Database::getFriendPair(const std::string& user_id) {
+   auto friendId = getFriendList(user_id);
+   auto friendUsername = getFriendListUsername(user_id);
+   std::vector<std::pair<std::string, std::string>> friendPair;
+   if(friendId.size() == friendUsername.size()) {
+       for(int i = 0; i < friendId.size(); i++) {
+           friendPair.emplace_back(friendId[i], friendUsername[i]);
+       }
+   }
+   return friendPair;
+}
 // 存储消息
 bool Database::storeMessage(const std::string& from_user_id, const std::string& to_user_id, const std::string& message_type, const std::string& content) {
     auto conn = getConnection();
