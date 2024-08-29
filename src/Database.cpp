@@ -158,8 +158,8 @@ bool Database::addFriend(const std::string& user_id, const std::string& friend_i
     sqlite3_bind_text(stmt, 4, friend_id.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 5, friend_id.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 6, user_id.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 7, friend_id.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 8, user_id.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 7, user_id.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 8, friend_id.c_str(), -1, SQLITE_STATIC);
 
     bool result = (sqlite3_step(stmt) == SQLITE_DONE);
     sqlite3_finalize(stmt);
@@ -249,7 +249,7 @@ std::vector<std::string> Database::getFriendList(const std::string& user_id) {
     auto conn = getConnection();
     sqlite3* db = conn->getConnection();
 
-    const char* sql = "SELECT friend_id FROM friends WHERE user_id = ? AND status = 1;";
+    const char* sql = "SELECT user_id, friend_id FROM friends WHERE (user_id = ? OR friend_id = ?) AND status = 1;";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
         std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
@@ -257,10 +257,12 @@ std::vector<std::string> Database::getFriendList(const std::string& user_id) {
     }
 
     sqlite3_bind_text(stmt, 1, user_id.c_str(), -1, SQLITE_STATIC);
-
+    sqlite3_bind_text(stmt, 2, user_id.c_str(), -1, SQLITE_STATIC);
     std::vector<std::string> friends;
+    
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         friends.push_back(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)));
+        
     }
 
     sqlite3_finalize(stmt);

@@ -112,6 +112,7 @@ void BusinessHandler::logoutUser(int userId,const std::shared_ptr<Session>& sess
 void BusinessHandler::addFriend(const Message& msg) {
     int userId = msg.getFromUserId();
     int friendId = msg.getToUserId();
+    if( userId == friendId) return; 
     Database& db = Database::getInstance();
     if(!db.addFriend(std::to_string(userId), std::to_string(friendId))) {
         std::cout << "Database excute [addFriend()] failed ! " << std::endl;
@@ -126,7 +127,7 @@ void BusinessHandler::addFriend(const Message& msg) {
             it->second->send(msg);
             std::cout << "Sent ADD_FRIEND_REQUEST from User " << userId << " to User " << friendId << std::endl;   
         }
-        //在登陆时推送好友信息
+        //TODO 在登陆时推送好友信息
     }
 }
 void BusinessHandler::ackAddFriend(const Message& msg) {
