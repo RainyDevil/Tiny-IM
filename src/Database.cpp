@@ -132,46 +132,42 @@ std::optional<std::string> Database::getUserNameById(const std::string& user_id)
 bool Database::addFriend(const std::string& user_id, const std::string& friend_id) {
     auto conn = getConnection();
     sqlite3* db = conn->getConnection();
-    const char* sql = R"(
-        INSERT INTO friends (user_id, friend_id, status)
-        SELECT ?, ?, 0
-        WHERE NOT EXISTS (
-            SELECT 1 FROM friends WHERE user_id = ? AND friend_id = ? AND status = 1
-        );
-
-        INSERT INTO friends (friend_id, user_id, status)
-        SELECT ?, ?, 0
-        WHERE NOT EXISTS (
-            SELECT 1 FROM friends WHERE user_id = ? AND friend_id = ? AND status = 1
-        );
-    )";
-
+    const char* sql1 = "INSERT OR IGNORE INTO friends (user_id, friend_id, status) VALUES (?, ?, 0);";
+    const char* sql2 = "INSERT OR IGNORE INTO friends (user_id, friend_id, status) VALUES (?, ?, 0);";
+    
     sqlite3_stmt* stmt;
-    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+    
+    // Prepare and execute the first INSERT statement
+    if (sqlite3_prepare_v2(db, sql1, -1, &stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "Failed to prepare statement 1: " << sqlite3_errmsg(db) << std::endl;
         return false;
     }
-
     sqlite3_bind_text(stmt, 1, user_id.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, friend_id.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 3, user_id.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 4, friend_id.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 5, friend_id.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 6, user_id.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 7, user_id.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 8, friend_id.c_str(), -1, SQLITE_STATIC);
-
-    bool result = (sqlite3_step(stmt) == SQLITE_DONE);
+    
+    bool result1 = (sqlite3_step(stmt) == SQLITE_DONE);
     sqlite3_finalize(stmt);
+    
+    // Prepare and execute the second INSERT statement
+    if (sqlite3_prepare_v2(db, sql2, -1, &stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "Failed to prepare statement 2: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+    sqlite3_bind_text(stmt, 1, friend_id.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, user_id.c_str(), -1, SQLITE_STATIC);
+
+    bool result2 = (sqlite3_step(stmt) == SQLITE_DONE);
+    sqlite3_finalize(stmt);
+
     connection_pool_.push(conn);
     cond_var_.notify_one();
-    return result;
+    return result1 && result2 ;
 }
 bool Database::ackAddFriend(const std::string& user_id, const std::string& friend_id) {
     auto conn = getConnection();
     sqlite3* db = conn->getConnection();
 
-    const char* sql = "UPDATE friends SET status = 1 WHERE user_id = ? AND friend_id = ?;";
+    const char* sql = "UPDATE friends SET status = 1 WHERE (user_id = ? AND friend_id = ?) OR (friend_id = ? AND user_id = ?);";
     sqlite3_stmt* stmt;
 
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
@@ -180,6 +176,8 @@ bool Database::ackAddFriend(const std::string& user_id, const std::string& frien
     }
     sqlite3_bind_text(stmt, 1, user_id.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, friend_id.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, user_id.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 4, friend_id.c_str(), -1, SQLITE_STATIC);
 
     bool result = (sqlite3_step(stmt) == SQLITE_DONE);
 
@@ -249,7 +247,7 @@ std::vector<std::string> Database::getFriendList(const std::string& user_id) {
     auto conn = getConnection();
     sqlite3* db = conn->getConnection();
 
-    const char* sql = "SELECT user_id, friend_id FROM friends WHERE (user_id = ? OR friend_id = ?) AND status = 1;";
+    const char* sql = "SELECT friend_id FROM friends WHERE user_id = ?  AND status = 1;";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
         std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
@@ -257,12 +255,10 @@ std::vector<std::string> Database::getFriendList(const std::string& user_id) {
     }
 
     sqlite3_bind_text(stmt, 1, user_id.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, user_id.c_str(), -1, SQLITE_STATIC);
     std::vector<std::string> friends;
     
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         friends.push_back(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)));
-        
     }
 
     sqlite3_finalize(stmt);
