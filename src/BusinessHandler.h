@@ -29,7 +29,7 @@ private:
     void sendGroupMessage(int fromUserId, int groupId, const std::string& content, const std::shared_ptr<Session>& session);
     void ackAddFriend(const Message& msg);
     void sendFriendList(const Message& msg, const std::shared_ptr<Session>& session);
-
+    void pushMessage(const Message& msg,const std::shared_ptr<Session>& session);
 private:
     std::unordered_map<int, std::shared_ptr<Session>> userSessions_; // 管理用户的会话
     std::unordered_map<int, std::vector<int>> userFriends_; // 用户ID到好友列表的映射

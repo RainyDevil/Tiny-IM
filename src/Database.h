@@ -10,6 +10,7 @@
 #include <vector>
 #include <unordered_map>
 #include <optional>
+#include "Message.h"
 //  CREATE TABLE users (
 //     user_id TEXT PRIMARY KEY,  -- 使用 UUID 作为主键
 //     username TEXT,             -- 用户名可以为空或重复
@@ -74,10 +75,10 @@ public:
     std::vector<std::string> getFriendList(const std::string& user_id);
     std::vector<std::string> getFriendListUsername(const std::string& user_id);
     std::vector<std::pair<std::string, std::string>> getFriendPair(const std::string& user_id);
-    
+
     // Message operations
     bool storeMessage(const std::string& from_user_id, const std::string& to_user_id, const std::string& message_type, const std::string& content);
-    std::vector<std::string> getRecentMessages(const std::string& user_id, int days);
+    std::vector<Message> getRecentMessages(const std::string& user_id, int days);
     bool storeOfflineMessage(const std::string& user_id, const std::string& content);
     std::vector<std::string> getOfflineMessages(const std::string& user_id);
     bool markMessagesAsRead(const std::string& user_id);

@@ -18,14 +18,7 @@ void BusinessHandler::handleIncomingMessage(const std::shared_ptr<Session>& sess
             logoutUser(from_userId, session);
             break;
         case Message::MessageType::TEXT:{
-            /// TODO 
-            // 0 代表公共聊天室
-            if(to_userId == 0)
-            {
-                sendGroupMessage(from_userId, to_userId, msg.getContent(), session);
-            } else{
-                sendMessageToUser(msg);
-            }
+            sendMessageToUser(msg);
             break;
         }
         case Message::MessageType::ADD_FRIEND:
@@ -45,7 +38,7 @@ void BusinessHandler::handleIncomingMessage(const std::shared_ptr<Session>& sess
             sendGroupMessage(from_userId, to_userId, msg.getContent(), session);
             break;
         case Message::MessageType::PULL_MESSAGE:
-            pullMessage(msg, session);
+            pushMessage(msg, session);
             break;
         default:
             std::cerr << "Unknown message type received" << std::endl;
@@ -160,27 +153,6 @@ void BusinessHandler::ackAddFriend(const Message& msg) {
             std::cout << "Database excute [ackAddFriend()] failed ! " << std::endl;
         }
     }
-    //同时更新fromUserId 和 toUserId 的好友列表
-    // if (userFriends_.find(toUserId) == userFriends_.end()) {
-    //     userFriends_[toUserId] = std::vector<int>();
-    // }
-    // if (userFriends_.find(fromUserId) == userFriends_.end()) {
-    //     userFriends_[fromUserId] = std::vector<int>();
-    // }
-    // auto& friendsListTo = userFriends_[toUserId];
-    // if (std::find(friendsListTo.begin(), friendsListTo.end(), fromUserId) == friendsListTo.end()) {
-    //     friendsListTo.push_back(fromUserId);
-    //     std::cout << "User " << toUserId << " added as a friend for User " << fromUserId << "." << std::endl;
-    // } else {
-    //     std::cerr << "User " << toUserId << " is already a friend of User " << fromUserId << "." << std::endl;
-    // }
-    // auto& friendsListFrom = userFriends_[fromUserId];
-    // if (std::find(friendsListFrom.begin(), friendsListFrom.end(), fromUserId) == friendsListFrom.end()) {
-    //     friendsListFrom.push_back(toUserId);
-    //     std::cout << "User " << fromUserId << " added as a friend for User " << toUserId << "." << std::endl;
-    // } else {
-    //     std::cerr << "User " << fromUserId << " is already a friend of User " << toUserId << "." << std::endl;
-    // }
 }
 // 发送私信
 void BusinessHandler::sendMessageToUser(const Message& msg) {
@@ -198,8 +170,9 @@ void BusinessHandler::sendMessageToUser(const Message& msg) {
        std::cout << "Database excute [storeMessage()] fail ! " << std::endl;
     }
     if (it != userSessions_.end()) {
-        Message msg(fromUserId, toUserId, Message::MessageType::TEXT, msg.getMessageId() + 1, content);
-        it->second->send(msg);
+        Message msg1(fromUserId, toUserId, Message::MessageType::TEXT, msg.getMessageId() + 1, content);
+        std::cout << "TimeStamp = " << msg1.getTimestamp() << std::endl;
+        it->second->send(msg1);
         std::cout << "Sent message from User " << fromUserId << " to User " << toUserId << ": " << content << std::endl;
     } else {
         std::cerr << "Failed to send message. User " << toUserId << " not found." << std::endl;
@@ -210,7 +183,7 @@ void BusinessHandler::sendMessageToUser(const Message& msg) {
 void BusinessHandler::sendGroupMessage(int fromUserId, int groupId, const std::string& content, const std::shared_ptr<Session>& session) {
     for (auto it = userSessions_.begin(); it != userSessions_.end(); ) {
         if(it->second != session){
-            Message msg(fromUserId, groupId,Message::MessageType::TEXT, groupId, content);
+            Message msg(fromUserId, groupId,Message::MessageType::GROUP_CHAT, groupId, content);
             it->second->send(msg);
         }
         it++;
@@ -243,4 +216,12 @@ void BusinessHandler::sendFriendList(const Message& msg, const std::shared_ptr<S
     }
     Message response(from_userId, to_userId, Message::MessageType::FRIEND_LIST, msg.getMessageId() + 1, friendsList.dump());
     session->send(response);
+}
+void BusinessHandler::pushMessage(const Message& msg,const std::shared_ptr<Session>& session){
+    Database& db = Database::getInstance();
+    int fromUserId = msg.getFromUserId();
+    auto messges = db.getRecentMessages(std::to_string(fromUserId), 1);//days = 1
+    for(auto m : messges) {
+        session->send(m);
+    }
 }

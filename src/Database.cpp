@@ -304,11 +304,11 @@ bool Database::storeMessage(const std::string& from_user_id, const std::string& 
 }
 
 // 获取最近消息
-std::vector<std::string> Database::getRecentMessages(const std::string& user_id, int days) {
+std::vector<Message> Database::getRecentMessages(const std::string& user_id, int days) {
     auto conn = getConnection();
     sqlite3* db = conn->getConnection();
 
-    const char* sql = "SELECT content FROM messages WHERE (from_user_id = ? OR to_user_id = ?) AND timestamp >= datetime('now', ? || ' days');";
+    const char* sql = "SELECT from_user_id, to_user_id, message_type, message_id, content timestamp FROM messages WHERE (from_user_id = ? OR to_user_id = ?) AND timestamp >= datetime('now', ? || ' days');";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
         std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
@@ -320,9 +320,19 @@ std::vector<std::string> Database::getRecentMessages(const std::string& user_id,
     sqlite3_bind_text(stmt, 2, user_id.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 3, day_string.c_str(), -1, SQLITE_STATIC);
 
-    std::vector<std::string> messages;
+    std::vector<Message> messages;
+    int from_user_id;
+    int to_user_id;
+    int message_id;
+    Message::MessageType msgtype;
+    std::string content;
     while (sqlite3_step(stmt) == SQLITE_ROW) {
-        messages.push_back(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)));
+        from_user_id = std::stoi(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)));
+        to_user_id = std::stoi(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1)));
+        msgtype = Message::stringToMessageType(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2)));
+        message_id = std::stoi(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 3)));
+        content = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 4));
+        messages.emplace_back(from_user_id, to_user_id, msgtype, message_id, content);
     }
 
     sqlite3_finalize(stmt);
