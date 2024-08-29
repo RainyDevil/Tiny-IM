@@ -10,63 +10,72 @@ body {
     height: 100vh;
     color: #2c3e50;
 }
-/* Login Container */
-#loginContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
+/* Common styles for login and register forms */
+.form-container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    margin: 0 auto;
 }
 
-.login-box {
-    background-color: #ffffff;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    max-width: 400px;
-    width: 100%;
+.form-container h2 {
+    margin-bottom: 20px;
     text-align: center;
 }
 
-.login-box h2 {
-    margin-top: 0;
-    margin-bottom: 20px;
-    font-family: 'Arial', sans-serif;
-    font-weight: bold;
-    color: #3498db;
-}
-
-.login-box input {
-    width: calc(100% - 20px);
-    padding: 15px;
-    margin-bottom: 15px;
-    border-radius: 5px;
-    border: 1px solid #bdc3c7;
-    font-size: 16px;
+.form-container input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
     box-sizing: border-box;
 }
 
-.login-box input:focus {
-    border-color: #3498db;
-    outline: none;
-}
-
-.login-box button {
+.form-container button {
     width: 100%;
-    padding: 15px;
-    border-radius: 5px;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
     border: none;
-    background-color: #3498db;
-    color: #ffffff;
-    font-size: 16px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s;
 }
 
-.login-box button:hover {
-    background-color: #2980b9;
+.form-container button:hover {
+    background-color: #0056b3;
 }
+
+.uuid-display {
+    margin-top: 20px;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.copy-button {
+    margin-left: 10px;
+    padding: 5px;
+    background-color: #17a2b8;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.copy-button:hover {
+    background-color: #117a8b;
+}
+
+/* Optional: Add styles for links */
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
 
 /* Chat Container */
 .chat-container {

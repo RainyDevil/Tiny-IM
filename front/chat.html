@@ -9,13 +9,32 @@
 <body>
     <div id="loading" class="loading"></div>
     <div id="loginContainer">
-        <div class="login-box">
+        <div class="form-container login-box">
             <h2>Login to Chat</h2>
             <form id="loginForm">
                 <input type="text" id="userId" placeholder="Enter your User ID" required>
                 <input type="password" id="password" placeholder="Enter your Password" required>
                 <button type="submit">Login</button>
             </form>
+            <p><a href="#" id="showRegister">Register here</a></p>
+        </div>
+    </div>
+    
+    <!-- Registration Page -->
+    <div id="registerContainer" style="display: none;">
+        <div class="form-container register-box">
+            <h2>Register for Chat</h2>
+            <form id="registerForm">
+                <input type="text" id="newUserName" placeholder="Enter your User Name" required>
+                <input type="password" id="newPassword" placeholder="Enter your Password" required>
+                <input type="password" id="confirmPassword" placeholder="Confirm your Password" required>
+                <button type="submit">Register</button>
+            </form>
+            <p id="uuidDisplay" class="uuid-display" style="display: none;">
+                Your UUID: <span id="uuidText"></span> 
+                <button id="copyButton" class="copy-button">Copy</button>
+            </p>
+            <p><a href="#" id="showLogin">Back to Login</a></p>
         </div>
     </div>
     <div class="chat-container" style="display: none;">
@@ -31,7 +50,7 @@
                 <li class="chat-item selected" data-chat="public-chat">Public Chat Room</li>
                 <li class="chat-item" data-chat="friends-list">Friends List</li>
                 <ul id="friendsList" class="chat-list" style="display: none;">
-                    <!-- 好友项 -->
+                    
                 </ul>
                 <li class="chat-item" id="friendRequestNotification" style="display: none;">
                     Friend Requests <span class="notification-dot"></span>
@@ -53,7 +72,7 @@
             <form class="chat-form" id="chatForm">
                 <button type="button" id="emojiButton" class="emoji-button">😊</button>
                 <div id="emojiPicker" class="emoji-picker">
-                    <!-- 表情面板将通过 JavaScript 动态生成 -->
+                    
                 </div>
                 <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off" required>
                 <button type="button" id="fileButton" class="file-button">File</button>
