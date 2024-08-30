@@ -4,7 +4,6 @@
 void BusinessHandler::handleIncomingMessage(const std::shared_ptr<Session>& session, const Message& msg) {    
     int from_userId = msg.getFromUserId();
     int to_userId = msg.getToUserId();
-    int messageId = msg.getMessageId();
     switch (msg.getMessageType()) {
         case Message::MessageType::SIGN_UP:
             signUp(msg, session);

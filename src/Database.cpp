@@ -128,7 +128,7 @@ std::optional<std::string> Database::getUserNameById(const std::string& user_id)
     cond_var_.notify_one();
     return username;
 }
-// Ìí¼ÓºÃÓÑ
+// ï¿½ï¿½ï¿½Óºï¿½ï¿½ï¿½
 bool Database::addFriend(const std::string& user_id, const std::string& friend_id) {
     auto conn = getConnection();
     sqlite3* db = conn->getConnection();
@@ -188,7 +188,7 @@ bool Database::ackAddFriend(const std::string& user_id, const std::string& frien
 
     return result;
 }
-// É¾³ýºÃÓÑ
+// É¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 bool Database::removeFriend(const std::string& user_id, const std::string& friend_id) {
     auto conn = getConnection();
     sqlite3* db = conn->getConnection();
@@ -210,7 +210,7 @@ bool Database::removeFriend(const std::string& user_id, const std::string& frien
     return result;
 }
 
-// »ñÈ¡ºÃÓÑÁÐ±íusername
+// ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½username
 std::vector<std::string> Database::getFriendListUsername(const std::string& user_id) {
     auto conn = getConnection();
     sqlite3* db = conn->getConnection();
@@ -242,7 +242,7 @@ std::vector<std::string> Database::getFriendListUsername(const std::string& user
     cond_var_.notify_one();
     return friendUsernames;
 }
-//»ñÈ¡ºÃÓÑÁÐ±íid
+//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½id
 std::vector<std::string> Database::getFriendList(const std::string& user_id) {
     auto conn = getConnection();
     sqlite3* db = conn->getConnection();
@@ -271,13 +271,13 @@ std::vector<std::pair<std::string, std::string>> Database::getFriendPair(const s
    auto friendUsername = getFriendListUsername(user_id);
    std::vector<std::pair<std::string, std::string>> friendPair;
    if(friendId.size() == friendUsername.size()) {
-       for(int i = 0; i < friendId.size(); i++) {
+       for(long unsigned int i = 0; i < friendId.size(); i++) {
            friendPair.emplace_back(friendId[i], friendUsername[i]);
        }
    }
    return friendPair;
 }
-// ´æ´¢ÏûÏ¢
+// ï¿½æ´¢ï¿½ï¿½Ï¢
 bool Database::storeMessage(const std::string& from_user_id, const std::string& to_user_id, const std::string& message_type, const std::string& content) {
     auto conn = getConnection();
     sqlite3* db = conn->getConnection();
@@ -301,7 +301,7 @@ bool Database::storeMessage(const std::string& from_user_id, const std::string& 
     return result;
 }
 
-// »ñÈ¡×î½üÏûÏ¢
+// ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 std::vector<Message> Database::getRecentMessages(const std::string& user_id, int days) {
     auto conn = getConnection();
     sqlite3* db = conn->getConnection();
@@ -339,7 +339,7 @@ std::vector<Message> Database::getRecentMessages(const std::string& user_id, int
     return messages;
 }
 
-// ´æ´¢ÀëÏßÏûÏ¢
+// ï¿½æ´¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 bool Database::storeOfflineMessage(const std::string& user_id, const std::string& content) {
     auto conn = getConnection();
     sqlite3* db = conn->getConnection();
@@ -361,7 +361,7 @@ bool Database::storeOfflineMessage(const std::string& user_id, const std::string
     return result;
 }
 
-// »ñÈ¡ÀëÏßÏûÏ¢
+// ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 std::vector<std::string> Database::getOfflineMessages(const std::string& user_id) {
     auto conn = getConnection();
     sqlite3* db = conn->getConnection();
@@ -386,7 +386,7 @@ std::vector<std::string> Database::getOfflineMessages(const std::string& user_id
     return messages;
 }
 
-// ±ê¼ÇÏûÏ¢ÎªÒÑ¶Á
+// ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢Îªï¿½Ñ¶ï¿½
 bool Database::markMessagesAsRead(const std::string& user_id) {
     auto conn = getConnection();
     sqlite3* db = conn->getConnection();
@@ -409,8 +409,8 @@ bool Database::markMessagesAsRead(const std::string& user_id) {
 // Helper functions 9Î»uuid
 std::string Database::generateUUID() {
     const std::string chars = "123456789";
-    std::random_device rd;  // Ê¹ÓÃËæ»úÉè±¸
-    std::mt19937 gen(rd()); // Ã·É­Ðý×ªËã·¨
+    std::random_device rd;  // Ê¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½è±¸
+    std::mt19937 gen(rd()); // Ã·É­ï¿½ï¿½×ªï¿½ã·¨
     std::uniform_int_distribution<> dist(0, chars.size() - 1);
 
     std::string result;

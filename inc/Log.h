@@ -13,6 +13,7 @@
 #include <string>
 #include <memory>
 #include <utility>
+#include <algorithm>  // 用于 std::transform
 
 // 日志级别
 enum class LogLevel {
@@ -40,9 +41,32 @@ public:
         return instance;
     }
 
+    // 使用字符串设置日志级别
+    void setLogLevel(const std::string& level) {
+        std::string level_lower = level;
+        std::transform(level_lower.begin(), level_lower.end(), level_lower.begin(), ::tolower);
+
+        if (level_lower == "debug") {
+            log_level = LogLevel::DEBUG;
+        } else if (level_lower == "info") {
+            log_level = LogLevel::INFO;
+        } else if (level_lower == "warning") {
+            log_level = LogLevel::WARNING;
+        } else if (level_lower == "error") {
+            log_level = LogLevel::ERROR;
+        } else {
+            std::cerr << "Invalid log level: " << level << ". Using default level: DEBUG." << std::endl;
+            log_level = LogLevel::DEBUG;
+        }
+    }
+
     // 记录日志（带有函数信息）
     template<typename... Args>
     void log(LogLevel level, const char* file, int line, const char* func, const std::string& format, Args&&... args) {
+        if (level < log_level) {
+            return;  // 如果日志级别低于全局设置的级别，则忽略
+        }
+
         std::string message = formatString(format, std::forward<Args>(args)...);
         std::ostringstream oss;
         oss << "[" << file << ":" << line << " - " << func << "] " << message;
@@ -59,6 +83,7 @@ private:
     std::queue<LogEntry> log_queue;
     std::mutex queue_mutex;
     std::condition_variable cv;
+    LogLevel log_level = LogLevel::DEBUG;  // 默认日志级别为 DEBUG
 
     Logger() : running(true), log_thread(&Logger::processEntries, this) {
         displayBanner();
@@ -126,8 +151,7 @@ private:
     // 显示启动字符图案
     void displayBanner() {
         std::cout << "***********************" << std::endl;
-        std::cout << "*   Welcome to Log    *" << std::endl;
-        std::cout << "*      System         *" << std::endl;
+        std::cout << "*   Welcome to Tiny-IM    *" << std::endl;
         std::cout << "***********************" << std::endl;
     }
 
