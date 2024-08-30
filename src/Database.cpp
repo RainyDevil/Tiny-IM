@@ -8,7 +8,7 @@
 
 DatabaseConnection::DatabaseConnection(const std::string& db_file) {
     if (sqlite3_open(db_file.c_str(), &db_) != SQLITE_OK) {
-        std::cerr << "Can't open database: " << sqlite3_errmsg(db_) << std::endl;
+        LOG_ERROR("Can't open database: {}", sqlite3_errmsg(db_));
         db_ = nullptr;
     }
 }
@@ -139,7 +139,7 @@ bool Database::addFriend(const std::string& user_id, const std::string& friend_i
     
     // Prepare and execute the first INSERT statement
     if (sqlite3_prepare_v2(db, sql1, -1, &stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Failed to prepare statement 1: " << sqlite3_errmsg(db) << std::endl;
+        LOG_ERROR("Failed to prepare statement 1:{}", sqlite3_errmsg(db));
         return false;
     }
     sqlite3_bind_text(stmt, 1, user_id.c_str(), -1, SQLITE_STATIC);
@@ -150,7 +150,7 @@ bool Database::addFriend(const std::string& user_id, const std::string& friend_i
     
     // Prepare and execute the second INSERT statement
     if (sqlite3_prepare_v2(db, sql2, -1, &stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Failed to prepare statement 2: " << sqlite3_errmsg(db) << std::endl;
+        LOG_ERROR("Failed to prepare statement 2:{}", sqlite3_errmsg(db));
         return false;
     }
     sqlite3_bind_text(stmt, 1, friend_id.c_str(), -1, SQLITE_STATIC);
@@ -171,7 +171,7 @@ bool Database::ackAddFriend(const std::string& user_id, const std::string& frien
     sqlite3_stmt* stmt;
 
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        LOG_ERROR("Failed to prepare statement:{}", sqlite3_errmsg(db));
         return false;
     }
     sqlite3_bind_text(stmt, 1, user_id.c_str(), -1, SQLITE_STATIC);
@@ -196,7 +196,7 @@ bool Database::removeFriend(const std::string& user_id, const std::string& frien
     const char* sql = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?;";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        LOG_ERROR("Failed to prepare statement:{}", sqlite3_errmsg(db));
         return false;
     }
 
@@ -224,7 +224,7 @@ std::vector<std::string> Database::getFriendListUsername(const std::string& user
 
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        LOG_ERROR("Failed to prepare statement:{}", sqlite3_errmsg(db));
         return {};
     }
 
@@ -250,7 +250,7 @@ std::vector<std::string> Database::getFriendList(const std::string& user_id) {
     const char* sql = "SELECT friend_id FROM friends WHERE user_id = ?  AND status = 1;";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        LOG_ERROR("Failed to prepare statement:{}", sqlite3_errmsg(db));
         return {};
     }
 
@@ -285,7 +285,7 @@ bool Database::storeMessage(const std::string& from_user_id, const std::string& 
     const char* sql = "INSERT INTO messages (from_user_id, to_user_id, message_type, content, timestamp) VALUES (?, ?, ?, ?, datetime('now'));";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        LOG_ERROR("Failed to prepare statement:{}", sqlite3_errmsg(db));
         return false;
     }
 
@@ -309,7 +309,7 @@ std::vector<Message> Database::getRecentMessages(const std::string& user_id, int
     const char* sql = "SELECT from_user_id, to_user_id, message_type, message_id, content timestamp FROM messages WHERE (from_user_id = ? OR to_user_id = ?) AND timestamp >= datetime('now', ? || ' days');";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        LOG_ERROR("Failed to prepare statement: {}",sqlite3_errmsg(db));
         return {};
     }
 
@@ -347,7 +347,7 @@ bool Database::storeOfflineMessage(const std::string& user_id, const std::string
     const char* sql = "INSERT INTO offline_messages (user_id, content) VALUES (?, ?);";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        LOG_ERROR("Failed to prepare statement: {}" ,sqlite3_errmsg(db));
         return false;
     }
 
@@ -369,7 +369,7 @@ std::vector<std::string> Database::getOfflineMessages(const std::string& user_id
     const char* sql = "SELECT content FROM offline_messages WHERE user_id = ?;";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        LOG_ERROR("Failed to prepare statement: {}" ,sqlite3_errmsg(db));
         return {};
     }
 
@@ -394,7 +394,7 @@ bool Database::markMessagesAsRead(const std::string& user_id) {
     const char* sql = "DELETE FROM offline_messages WHERE user_id = ?;";
     sqlite3_stmt* stmt;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        LOG_ERROR("Failed to prepare statement: {}", sqlite3_errmsg(db));
         return false;
     }
 

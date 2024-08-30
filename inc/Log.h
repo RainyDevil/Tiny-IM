@@ -150,9 +150,9 @@ private:
 
     // 显示启动字符图案
     void displayBanner() {
-        std::cout << "***********************" << std::endl;
-        std::cout << "*   Welcome to Tiny-IM    *" << std::endl;
-        std::cout << "***********************" << std::endl;
+        std::cout << "**********************" << std::endl;
+        std::cout << "* Welcome to Tiny-IM *" << std::endl;
+        std::cout << "**********************" << std::endl;
     }
 
     // 格式化字符串

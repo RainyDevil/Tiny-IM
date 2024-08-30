@@ -7,6 +7,7 @@
 #include <boost/beast.hpp>
 #include <boost/beast/websocket.hpp>
 #include "Session.h"
+#include "Log.h"
 using boost::asio::ip::tcp;
 namespace beast = boost::beast;             // from <boost/beast.hpp>
 namespace http = beast::http;               // from <boost/beast/http.hpp>

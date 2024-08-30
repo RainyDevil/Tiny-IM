@@ -16,13 +16,13 @@ int main(int argc, char* argv[]) {
             boost::asio::io_context io_context;
             tcp::endpoint endpoint(tcp::v4(), config.getPort());
             Server server(io_context, endpoint);
-            std::cout << "Server Start ..." << std::endl;
+            LOG_INFO("Server Start ...");
             io_context.run();
         } catch (std::exception& e) {
-            std::cerr << "Exception: " << e.what() << "\n";
+            LOG_ERROR("Exception: {}", e.what()) ;
         }
         Utils::printProcessStats(getpid());
-        std::cout << "Server Restart ..." << std::endl;
+        LOG_ERROR("Server Restart ...");
     }
 
 

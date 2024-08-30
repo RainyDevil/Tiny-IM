@@ -81,7 +81,7 @@ Message Message::fromJson(const std::string& jsonString) {
     return msg;
 }
 
-// Helper function to convert string to MessageType
+// Helper function 
 Message::MessageType Message::stringToMessageType(const std::string& typeStr) {
     if (typeStr == "PULL_MESSAGE") return MessageType::PULL_MESSAGE;
     if (typeStr == "SIGN_UP") return MessageType::SIGN_UP;
@@ -96,11 +96,10 @@ Message::MessageType Message::stringToMessageType(const std::string& typeStr) {
     if (typeStr == "GROUP_CHAT") return MessageType::GROUP_CHAT;
     if (typeStr == "FRIEND_REQUEST") return MessageType::FRIEND_REQUEST;
     if (typeStr == "FRIEND_REQUEST_RESPONSE") return MessageType::FRIEND_REQUEST_RESPONSE;
-    // Add more mappings as needed
     throw std::invalid_argument("Unknown message type");
 }
 
-// Helper function to convert MessageType to string
+// Helper function 
 std::string Message::messageTypeToString(MessageType type) {
     switch (type) {
         case MessageType::SIGN_UP: return "SIGN_UP";
@@ -116,7 +115,6 @@ std::string Message::messageTypeToString(MessageType type) {
         case MessageType::FRIEND_REQUEST: return "FRIEND_REQUEST";
         case MessageType::FRIEND_REQUEST_RESPONSE: return "FRIEND_REQUEST_RESPONSE";
         case MessageType::PULL_MESSAGE: return "PULL_MESSAGE";
-        // Add more mappings as needed
         default: throw std::invalid_argument("Unknown message type");
     }
 }

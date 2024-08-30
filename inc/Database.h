@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <optional>
 #include "Message.h"
+#include "Log.h"
 //  CREATE TABLE users (
 //     user_id TEXT PRIMARY KEY,  
 //     username TEXT,             

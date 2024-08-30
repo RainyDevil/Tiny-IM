@@ -40,7 +40,7 @@ void BusinessHandler::handleIncomingMessage(const std::shared_ptr<Session>& sess
             pushMessage(msg, session);
             break;
         default:
-            std::cerr << "Unknown message type received" << std::endl;
+           LOG_ERROR("Unknown message type received");
     }
 }
 //sign up
@@ -65,7 +65,7 @@ void BusinessHandler::loginUser(const Message& msg, const std::shared_ptr<Sessio
     //只有一人可以登号
     if(username.has_value()){
         if (userSessions_.find(userId) != userSessions_.end()) {
-            std::cerr << "User " << userId << " is already logged in." << std::endl;
+            LOG_ERROR("User {} is already logged in." , userId);
             nlohmann::json j;
             j["status"] = "fail";
             j["username"] = " ";
@@ -80,7 +80,7 @@ void BusinessHandler::loginUser(const Message& msg, const std::shared_ptr<Sessio
             j["username"] = username.value();
             Message msg(userId, 0,Message::MessageType::LOGIN_RESPONSE, msg.getMessageId() + 1, j.dump());
             session->send(msg);
-            std::cout << "User " << userId << " logged in." << std::endl;
+            LOG_INFO("User {} logged in." , userId);
         }
     }
     else{
@@ -100,10 +100,10 @@ void BusinessHandler::logoutUser(int userId,const std::shared_ptr<Session>& sess
     if (it != userSessions_.end()) {
         userSessions_.erase(it);
         session->close();
-        std::cout << "User " << userId << " logged out." << std::endl;
+        LOG_INFO("User {} logged out.", userId);
     } else {
         session->close();
-        std::cerr << "Logout failed. User " << userId << " not found." << std::endl;
+       LOG_ERROR("Logout failed. User {} not found." , userId);
     }
 }
 
@@ -114,7 +114,7 @@ void BusinessHandler::addFriend(const Message& msg) {
     if( userId == friendId) return; 
     Database& db = Database::getInstance();
     if(!db.addFriend(std::to_string(userId), std::to_string(friendId))) {
-        std::cout << "Database excute [addFriend()] failed ! " << std::endl;
+        LOG_WARNING("Database excute [addFriend()] failed ! ");
         return ;
     };
     std::optional<std::string> username = db.getUserNameById(std::to_string(userId));
@@ -124,7 +124,7 @@ void BusinessHandler::addFriend(const Message& msg) {
         if( it != userSessions_.end()){
             Message msg(userId, friendId, Message::MessageType::FRIEND_REQUEST, msg.getMessageId() + 1, username.value());
             it->second->send(msg);
-            std::cout << "Sent ADD_FRIEND_REQUEST from User " << userId << " to User " << friendId << std::endl;   
+            LOG_INFO("Sent ADD_FRIEND_REQUEST from User {} to User {}", userId, friendId);   
         }
         //TODO 在登陆时推送好友信息
     }
@@ -139,18 +139,18 @@ void BusinessHandler::ackAddFriend(const Message& msg) {
     if(content == "reject") {
         if(db.removeFriend(std::to_string(friendId), std::to_string(userId))){
             std::cout << "Database excute [removeFriend()] sucess ! " << std::endl;
-            std::cout << userId << "reject" << friendId << "friend request !" << std::endl;
+            LOG_INFO("{} reject {} friend request !", userId, friendId);
             return ;
         } else {
-            std::cout << "Database excute [removeFriend()] failed ! " << std::endl;
+            LOG_WARNING("Database excute [removeFriend()] failed ! ");
         }
     } else if(content == "accept"){
         if(db.ackAddFriend(std::to_string(friendId), std::to_string(userId)))
         {
-            std::cout << "Database excute [ackAddFriend()] sucess ! " << std::endl;
-            std::cout << "User " << friendId << " added as a friend for User " << userId << "." << std::endl;
+            LOG_INFO("Database excute [ackAddFriend()] sucess ! ");
+            LOG_INFO("User {}  added as a friend for User {}", friendId, userId);
         } else {
-            std::cout << "Database excute [ackAddFriend()] failed ! " << std::endl;
+            LOG_WARNING("Database excute [ackAddFriend()] failed ! ");
         }
     }
 }
@@ -165,17 +165,16 @@ void BusinessHandler::sendMessageToUser(const Message& msg) {
        std::to_string(toUserId), 
        Message::messageTypeToString(Message::MessageType::TEXT), 
        content)){
-       std::cout << "Database excute [storeMessage()] sucess ! " << std::endl;
+       LOG_INFO("Database excute [storeMessage()] sucess ! ");
     } else {
-       std::cout << "Database excute [storeMessage()] fail ! " << std::endl;
+       LOG_WARNING("Database excute [storeMessage()] fail ! ");
     }
     if (it != userSessions_.end()) {
         Message msg1(fromUserId, toUserId, Message::MessageType::TEXT, msg.getMessageId() + 1, content);
-        std::cout << "TimeStamp = " << msg1.getTimestamp() << std::endl;
         it->second->send(msg1);
-        std::cout << "Sent message from User " << fromUserId << " to User " << toUserId << ": " << content << std::endl;
+        LOG_INFO("Sent message from User {} to User {} ", fromUserId, toUserId);
     } else {
-        std::cerr << "Failed to send message. User " << toUserId << " not found." << std::endl;
+       LOG_ERROR("Failed to send message. User {} not found.",  toUserId);
     }
 }
 
@@ -187,7 +186,7 @@ void BusinessHandler::sendGroupMessage(int fromUserId, int groupId, const std::s
             it->second->send(msg);
         }
         it++;
-        std::cout << "Sent group message from User " << fromUserId << " to Group " << groupId << ": " << content << std::endl;
+        LOG_INFO("Sent group message from User {}  to Group {} ", fromUserId, groupId);
     }
 }
 void BusinessHandler::handleDisconnection(const std::shared_ptr<Session>& session) {

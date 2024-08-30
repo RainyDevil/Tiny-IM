@@ -10,7 +10,7 @@
 #include <iomanip>
 #include <string>
 #include <stdexcept>
-
+#include "Log.h"
 class Utils {
 public:
     // 将 Unix 时间戳转换为 "YYYY-MM-DD HH:MM:SS" 格式的日期字符串
@@ -78,12 +78,12 @@ public:
         long vsize = std::stol(tokens[22]);  // Virtual memory size in bytes
         long rss = std::stol(tokens[23]);    // Resident Set Size (pages)
 
-        std::cout << "Process ID: " << pid << std::endl;
-        std::cout << "Process Name: " << processName << std::endl;
-        std::cout << "User Time (jiffies): " << utime << std::endl;
-        std::cout << "System Time (jiffies): " << stime << std::endl;
-        std::cout << "Virtual Memory Size (bytes): " << vsize << std::endl;
-        std::cout << "Resident Set Size (pages): " << rss << std::endl;
+        LOG_INFO("Process ID: {}", pid );
+        LOG_INFO("Process Name: {}", processName);
+        LOG_INFO("User Time (jiffies): {}", utime);
+        LOG_INFO("System Time (jiffies): {}", stime);
+        LOG_INFO("Virtual Memory Size (bytes): {}", vsize);
+        LOG_INFO("Resident Set Size (pages): {}", rss);
     }
 };
 

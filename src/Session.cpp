@@ -34,17 +34,17 @@ void Session::readMessage() {
                 std::string json_data = beast::buffers_to_string(buffer_.data());
                 buffer_.consume(length); // Clear the buffer
                 try {
-                    std::cout << "[LOG] JSON meta data : " << json_data << std::endl; 
+                    LOG_INFO("JSON meta data : {}", json_data); 
                     Message msg = Message::fromJson(json_data);
                     businessHandler_->handleIncomingMessage(self, msg);
                 } catch (const std::exception& e) {
-                    std::cerr << "Failed to parse message: " << e.what() << std::endl;
+                    LOG_ERROR("Failed to parse message: {}", e.what());
                 }
                 if (ws_.is_open()) {
                     readMessage(); // Read the next message
                 }
             } else {
-                std::cerr << "WebSocket read error: " << ec.message() << std::endl;
+                LOG_ERROR("WebSocket read error: {}", ec.message());
                 ws_.close(websocket::close_code::normal);
             }
         }
@@ -55,7 +55,7 @@ void Session::close() {
     ws_.async_close(websocket::close_code::normal,
         [this,self](beast::error_code ec) {
             if (ec) {
-                std::cerr << "WebSocket close error: " << ec.message() << std::endl;
+                LOG_ERROR("WebSocket close error: {}", ec.message());
             }
             businessHandler_->handleDisconnection(self);
         }
@@ -77,7 +77,7 @@ void Session::write() {
                     }
                 }
             } else {
-                std::cerr << "WebSocket write error: " << ec.message() << std::endl;
+                LOG_ERROR("WebSocket write error: {}", ec.message());
                 ws_.close(websocket::close_code::normal);
             }
         }

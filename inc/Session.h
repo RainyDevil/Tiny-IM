@@ -6,6 +6,7 @@
 #include <string>
 #include "Message.h"
 #include "BusinessHandler.h"
+#include "Log.h"
 class BusinessHandler;
 namespace net = boost::asio;
 using tcp = boost::asio::ip::tcp;
