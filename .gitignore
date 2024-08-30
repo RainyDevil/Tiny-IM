@@ -58,3 +58,6 @@ Thumbs.db
 # Ignore the ChatServer executable
 ChatServer
 ChatServer.exe
+
+#DB
+*.db
