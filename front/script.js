@@ -155,7 +155,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     document.getElementById('addFriendButton').addEventListener('click', function () {
         const friendId = document.getElementById('friendIdInput').value.trim();
-        if (friendId) {
+        const friendIdPattern = /^\d{9}$/;
+        if (friendId && friendIdPattern.test(friendId)) {
             addFriendRequest(parseInt(friendId, 10));
         } else {
             alert('Please enter a valid Friend ID');
