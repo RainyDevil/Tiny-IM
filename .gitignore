@@ -7,7 +7,7 @@ CTestTestfile.cmake
 *.cmake
 
 # Build directories
-./build/
+build
 ./Debug/
 ./Release/
 ./RelWithDebInfo/
