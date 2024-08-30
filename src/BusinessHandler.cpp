@@ -7,11 +7,9 @@ void BusinessHandler::handleIncomingMessage(const std::shared_ptr<Session>& sess
     switch (msg.getMessageType()) {
         case Message::MessageType::SIGN_UP:
             signUp(msg, session);
-            std::cout << Utils::unixTimestampToDate(msg.getTimestamp()) << std::endl;
             break;
         case Message::MessageType::LOGIN:
             loginUser(msg, session);
-            std::cout << Utils::unixTimestampToDate(msg.getTimestamp()) << std::endl;
             break;
         case Message::MessageType::LOGOUT:
             logoutUser(from_userId, session);
@@ -111,7 +109,9 @@ void BusinessHandler::logoutUser(int userId,const std::shared_ptr<Session>& sess
 void BusinessHandler::addFriend(const Message& msg) {
     int userId = msg.getFromUserId();
     int friendId = msg.getToUserId();
-    if( userId == friendId) return; 
+    if( userId == friendId){
+        LOG_WARNING("User {} add himself !", userId);
+        return;}  
     Database& db = Database::getInstance();
     if(!db.addFriend(std::to_string(userId), std::to_string(friendId))) {
         LOG_WARNING("Database excute [addFriend()] failed ! ");
@@ -138,7 +138,7 @@ void BusinessHandler::ackAddFriend(const Message& msg) {
     Database& db = Database::getInstance();
     if(content == "reject") {
         if(db.removeFriend(std::to_string(friendId), std::to_string(userId))){
-            std::cout << "Database excute [removeFriend()] sucess ! " << std::endl;
+            LOG_INFO("Database excute [removeFriend()] sucess ! ");
             LOG_INFO("{} reject {} friend request !", userId, friendId);
             return ;
         } else {
@@ -174,7 +174,7 @@ void BusinessHandler::sendMessageToUser(const Message& msg) {
         it->second->send(msg1);
         LOG_INFO("Sent message from User {} to User {} ", fromUserId, toUserId);
     } else {
-       LOG_ERROR("Failed to send message. User {} not found.",  toUserId);
+       LOG_WARNING("Failed to send message. User {} not found.",  toUserId);
     }
 }
 
