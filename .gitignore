@@ -7,11 +7,11 @@ CTestTestfile.cmake
 *.cmake
 
 # Build directories
-./build
-./Debug/
-./Release/
-./RelWithDebInfo/
-./MinSizeRel/
+build/
+Debug/
+Release/
+RelWithDebInfo/
+MinSizeRel/
 
 # Binary files
 *.o
@@ -54,3 +54,7 @@ Thumbs.db
 *.orig
 *.rej
 *.diff
+
+# Ignore the ChatServer executable
+ChatServer
+ChatServer.exe
