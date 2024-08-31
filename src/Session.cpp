@@ -1,13 +1,20 @@
 #include "Session.h"
 #include <iostream>
 
-Session::Session(websocket::stream<tcp::socket> ws, std::shared_ptr<BusinessHandler> handler)
-    :ws_(std::move(ws)), businessHandler_(handler) {}
+Session::Session(websocket::stream<tcp::socket> ws, std::shared_ptr<BusinessHandler> handler,
+    std::function<void(std::shared_ptr<Session>)> on_close)
+    :ws_(std::move(ws)), businessHandler_(handler), on_close_(on_close) {}
 
 void Session::start() {
     readMessage();
 }
-
+void Session::stop() {
+    boost::system::error_code ec;
+    ws_.close(websocket::close_code::normal, ec);
+    if (on_close_) {
+        on_close_(shared_from_this());  // 调用关闭回调
+    }
+}
 void Session::send(const Message& msg) {
     auto self(shared_from_this());
     boost::asio::post(ws_.get_executor(),
@@ -44,8 +51,8 @@ void Session::readMessage() {
                     readMessage(); // Read the next message
                 }
             } else {
+                stop();
                 LOG_ERROR("WebSocket read error: {}", ec.message());
-                ws_.close(websocket::close_code::normal);
             }
         }
     );
@@ -77,8 +84,8 @@ void Session::write() {
                     }
                 }
             } else {
+                stop();
                 LOG_ERROR("WebSocket write error: {}", ec.message());
-                ws_.close(websocket::close_code::normal);
             }
         }
     );

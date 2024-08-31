@@ -19,6 +19,7 @@ public:
 
 private:
     void accept();
+    void removeSession(std::shared_ptr<Session> session);
     std::shared_ptr<BusinessHandler> shared_handler_;
     tcp::acceptor acceptor_;
     std::set<std::shared_ptr<Session>> sessions_;

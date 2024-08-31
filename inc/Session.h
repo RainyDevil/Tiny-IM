@@ -14,13 +14,14 @@ namespace beast = boost::beast;
 namespace websocket = beast::websocket;
 class Session : public std::enable_shared_from_this<Session> {
 public:
-    Session(websocket::stream<tcp::socket> ws,std::shared_ptr<BusinessHandler> handler);
+    Session(websocket::stream<tcp::socket> ws,std::shared_ptr<BusinessHandler> handler,
+    std::function<void(std::shared_ptr<Session>)> on_close);
 
     void start();
     void send(const Message& msg);
     void close();
     websocket::stream<tcp::socket>& getSocket();
-
+    void stop();
 private:
     void readMessage();
     void write();
@@ -29,5 +30,6 @@ private:
     std::shared_ptr<BusinessHandler> businessHandler_;
     Message read_msg_;
     std::deque<Message> write_msgs_;
+    std::function<void(std::shared_ptr<Session>)> on_close_;
 };
 
