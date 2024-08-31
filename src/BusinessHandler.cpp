@@ -180,6 +180,10 @@ void BusinessHandler::sendMessageToUser(const Message& msg) {
 
 // ÈºÁÄÏûÏ¢
 void BusinessHandler::sendGroupMessage(int fromUserId, int groupId, const std::string& content, const std::shared_ptr<Session>& session) {
+    auto it = userSessions_.find(fromUserId);
+    if(it == userSessions_.end()) {
+        LOG_ERROR("User {} not login but send message !");
+    } 
     for (auto it = userSessions_.begin(); it != userSessions_.end(); ) {
         if(it->second != session){
             Message msg(fromUserId, groupId,Message::MessageType::GROUP_CHAT, groupId, content);
