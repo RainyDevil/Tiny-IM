@@ -8,6 +8,7 @@ Session::Session(websocket::stream<tcp::socket> ws, std::shared_ptr<BusinessHand
 void Session::start() {
     readMessage();
 }
+/// @brief 客户端断开连接，服务器要做清理从set中移除Session
 void Session::stop() {
     boost::system::error_code ec;
     ws_.close(websocket::close_code::normal, ec);
@@ -57,6 +58,7 @@ void Session::readMessage() {
         }
     );
 }
+/// @brief 服务器主动断开连接
 void Session::close() {
     auto self(shared_from_this());
     ws_.async_close(websocket::close_code::normal,

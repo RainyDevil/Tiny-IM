@@ -3,15 +3,15 @@
 PROJECT_NAME = ChatServer
 
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Iinc -I$(BOOST_INCLUDE_DIR)
+CXXFLAGS =  -std=c++17 -Wall -Iinc -I$(BOOST_INCLUDE_DIR)
 
-LDFLAGS = -lsqlite3 -lssl -lcrypto -lboost_system -lboost_thread -lpthread
+LDFLAGS =  -lsqlite3 -lssl -lcrypto -lboost_system -lboost_thread -lpthread
 
 BUILD_TYPE ?= Debug
 
 ifeq ($(BUILD_TYPE), Debug)
     CXXFLAGS += -g -O0
-else ifeq ($(BUILD_TYPE), Release)
+else ifeq ($(BUILD_TYPE), Release)s
     CXXFLAGS += -O2
 endif
 
