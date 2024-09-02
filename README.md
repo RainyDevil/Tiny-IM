@@ -119,14 +119,14 @@ CREATE TABLE messages (
     FOREIGN KEY (to_user_id) REFERENCES users(user_id)
 );
 ```
-同时要配置config.json文件，给出一份示例文件如下：
+同时要配置config.json文件，示例文件如下：
 ```json
 {
     "port" : 8080, 
     "host" : "localhost", 
     "db_name" : "chat_app.db",
     "log_level" : "debug",
-    "connection_size" : 10  //数据库连接池大小
+    "connection_size" : 10  
 }
 ```
 ## TODO
