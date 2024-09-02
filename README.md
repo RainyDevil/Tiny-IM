@@ -79,8 +79,8 @@ Tiny IM 是一个简单的即时通信系统，旨在提供基本的即时消息
 
 4. 运行客户端：
 
-    打开fromt/chat.html客户端网页文件连接到服务器。
-    ![alt text](./doc/img/image.png)
+    打开front/chat.html客户端网页文件连接到服务器。
+    ![alt text](doc/img/image.png)
 
 ### 数据库初始化
 
